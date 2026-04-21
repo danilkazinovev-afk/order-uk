@@ -41,6 +41,9 @@ export default function Home() {
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: 'var(--bg)' }}>
       <header className="shrink-0 z-40" style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        <div className="px-5 py-1.5 text-[12px] font-medium" style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)', color: 'var(--text3)' }}>
+          Enter quantities in the <span className="font-semibold" style={{ color: 'var(--cta)' }}>Order (boxes)</span> column to build your order.
+        </div>
         <div className="px-5 py-3 flex flex-wrap items-center gap-4">
 
           {/* Brand + client name */}
@@ -48,7 +51,7 @@ export default function Home() {
             <Image src="/logo.png" alt="Logo" width={72} height={72} className="rounded-lg shrink-0" />
             <div className="flex flex-col leading-none">
               <span className="font-bold text-[17px] tracking-tight" style={{ color: 'var(--text)' }}>Tea Order Form</span>
-              <span className="text-[11px] uppercase tracking-widest font-medium mt-0.5" style={{ color: 'var(--text3)' }}>Wholesale</span>
+              <span className="text-[12px] uppercase tracking-widest font-medium mt-0.5" style={{ color: 'var(--text3)' }}>Wholesale</span>
             </div>
             <div className="h-5 w-px" style={{ background: 'var(--border2)' }} />
             <label htmlFor="client-name" className="sr-only">Client name</label>
@@ -105,7 +108,7 @@ export default function Home() {
 
       <main className="flex-1 overflow-hidden p-4 flex flex-col">
         <div className="flex-1 rounded-xl overflow-hidden relative" style={{ border: '1px solid var(--border)', background: 'var(--surface)', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
-          <OrderTable order={order} onChange={handleChange} hasOrder={hasOrder} />
+          <OrderTable order={order} onChange={handleChange} />
         </div>
       </main>
 

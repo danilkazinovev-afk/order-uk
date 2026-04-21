@@ -32,7 +32,7 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
         {/* Header */}
         <div className="px-6 py-4 flex items-start justify-between" style={{ borderBottom: '1px solid var(--border)' }}>
           <div>
-            <h2 id="summary-title" className="text-base font-bold" style={{ color: 'var(--text)' }}>Order Summary</h2>
+            <h2 id="summary-title" className="text-[17px] font-bold" style={{ color: 'var(--text)' }}>Order Summary</h2>
             <p className="text-sm mt-0.5" style={{ color: 'var(--text3)' }}>
               {clientName
                 ? <>Client: <span style={{ color: 'var(--text2)' }}>{clientName}</span></>
@@ -55,7 +55,7 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
 
         {/* Table */}
         {rows.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center py-16 text-base font-medium" style={{ color: 'var(--text3)' }}>
+          <div className="flex-1 flex items-center justify-center py-16 text-[17px] font-medium" style={{ color: 'var(--text3)' }}>
             No items ordered yet.
           </div>
         ) : (
@@ -96,7 +96,7 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
                   <td className="py-3 px-4 text-right font-bold tabular-nums" style={{ color: 'var(--text)' }}>{grand.packs}</td>
                   <td className="py-3 px-4 text-right tabular-nums" style={{ color: 'var(--text3)' }}>{grand.pallets.toFixed(3)}</td>
                   <td className="py-3 px-4 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{grand.weightGross.toFixed(2)}</td>
-                  <td className="py-3 px-4 text-right font-bold tabular-nums text-base" style={{ color: 'var(--value)' }}>€{grand.totalValue.toFixed(2)}</td>
+                  <td className="py-3 px-4 text-right font-bold tabular-nums text-[17px]" style={{ color: 'var(--value)' }}>€{grand.totalValue.toFixed(2)}</td>
                 </tr>
               </tfoot>
             </table>

@@ -25,15 +25,42 @@
   --value2:    #047857;
 
   /* Category — white bg, colored border + text only */
-  --cat-blue-bg:      #FFFFFF;
-  --cat-blue-text:    #1D4ED8;
-  --cat-blue-border:  #3B82F6;
-  --cat-violet-bg:    #FFFFFF;
-  --cat-violet-text:  #7C3AED;
-  --cat-violet-border:#8B5CF6;
-  --cat-teal-bg:      #FFFFFF;
-  --cat-teal-text:    #0D9488;
-  --cat-teal-border:  #14B8A6;
+  /* Tea Family */
+  --cat-blue-bg:        #FFFFFF;
+  --cat-blue-text:      #1D4ED8;
+  --cat-blue-border:    #3B82F6;
+  /* Sherlock Secrets — leaf */
+  --cat-amber-bg:       #FFFFFF;
+  --cat-amber-text:     #92400E;
+  --cat-amber-border:   #F59E0B;
+  /* Sherlock Secrets — tea bags */
+  --cat-orange-bg:      #FFFFFF;
+  --cat-orange-text:    #9A3412;
+  --cat-orange-border:  #FB923C;
+  /* Sherlock Secrets — sachets */
+  --cat-rose-bg:        #FFFFFF;
+  --cat-rose-text:      #9F1239;
+  --cat-rose-border:    #FB7185;
+  /* Tea Moments — sachets */
+  --cat-teal-bg:        #FFFFFF;
+  --cat-teal-text:      #0D9488;
+  --cat-teal-border:    #14B8A6;
+  /* Tea Moments — pyramids */
+  --cat-emerald-bg:     #FFFFFF;
+  --cat-emerald-text:   #065F46;
+  --cat-emerald-border: #34D399;
+  /* Tea Moments — caddy */
+  --cat-sky-bg:         #FFFFFF;
+  --cat-sky-text:       #075985;
+  --cat-sky-border:     #38BDF8;
+  /* Tea Moments — assorted */
+  --cat-violet-bg:      #FFFFFF;
+  --cat-violet-text:    #5B21B6;
+  --cat-violet-border:  #A78BFA;
+  /* Tea Moments — tube */
+  --cat-cyan-bg:        #FFFFFF;
+  --cat-cyan-text:      #164E63;
+  --cat-cyan-border:    #22D3EE;
 }
 
 body {

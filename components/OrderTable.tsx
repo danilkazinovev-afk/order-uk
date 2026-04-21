@@ -7,29 +7,28 @@ import { calcRow, calcCategoryTotals, OrderState } from '@/lib/calculations'
 interface Props {
   order: OrderState
   onChange: (article: string, value: number) => void
-  hasOrder: boolean
 }
 
 const CATEGORY_THEME: Record<string, { bg: string; text: string; border: string }> = {
-  'tea-family':      { bg: 'var(--cat-blue-bg)',   text: 'var(--cat-blue-text)',   border: 'var(--cat-blue-border)' },
-  'sherlock-leaf':   { bg: 'var(--cat-violet-bg)',  text: 'var(--cat-violet-text)', border: 'var(--cat-violet-border)' },
-  'sherlock-teabags':{ bg: 'var(--cat-violet-bg)',  text: 'var(--cat-violet-text)', border: 'var(--cat-violet-border)' },
-  'sherlock-sachets':{ bg: 'var(--cat-violet-bg)',  text: 'var(--cat-violet-text)', border: 'var(--cat-violet-border)' },
-  'tm-sachets':      { bg: 'var(--cat-teal-bg)',    text: 'var(--cat-teal-text)',   border: 'var(--cat-teal-border)' },
-  'tm-pyramids':     { bg: 'var(--cat-teal-bg)',    text: 'var(--cat-teal-text)',   border: 'var(--cat-teal-border)' },
-  'tm-caddy':        { bg: 'var(--cat-teal-bg)',    text: 'var(--cat-teal-text)',   border: 'var(--cat-teal-border)' },
-  'tm-assorted':     { bg: 'var(--cat-teal-bg)',    text: 'var(--cat-teal-text)',   border: 'var(--cat-teal-border)' },
-  'tm-tube':         { bg: 'var(--cat-teal-bg)',    text: 'var(--cat-teal-text)',   border: 'var(--cat-teal-border)' },
+  'tea-family':       { bg: 'var(--cat-blue-bg)',    text: 'var(--cat-blue-text)',    border: 'var(--cat-blue-border)' },
+  'sherlock-leaf':    { bg: 'var(--cat-amber-bg)',   text: 'var(--cat-amber-text)',   border: 'var(--cat-amber-border)' },
+  'sherlock-teabags': { bg: 'var(--cat-orange-bg)',  text: 'var(--cat-orange-text)',  border: 'var(--cat-orange-border)' },
+  'sherlock-sachets': { bg: 'var(--cat-rose-bg)',    text: 'var(--cat-rose-text)',    border: 'var(--cat-rose-border)' },
+  'tm-sachets':       { bg: 'var(--cat-teal-bg)',    text: 'var(--cat-teal-text)',    border: 'var(--cat-teal-border)' },
+  'tm-pyramids':      { bg: 'var(--cat-emerald-bg)', text: 'var(--cat-emerald-text)', border: 'var(--cat-emerald-border)' },
+  'tm-caddy':         { bg: 'var(--cat-sky-bg)',     text: 'var(--cat-sky-text)',     border: 'var(--cat-sky-border)' },
+  'tm-assorted':      { bg: 'var(--cat-violet-bg)',  text: 'var(--cat-violet-text)',  border: 'var(--cat-violet-border)' },
+  'tm-tube':          { bg: 'var(--cat-cyan-bg)',    text: 'var(--cat-cyan-text)',    border: 'var(--cat-cyan-border)' },
 }
 
 function fmt(n: number, decimals = 2) {
   return n > 0 ? n.toFixed(decimals) : null
 }
 
-export default function OrderTable({ order, onChange, hasOrder }: Props) {
+export default function OrderTable({ order, onChange }: Props) {
   return (
     <div className="overflow-auto h-full absolute inset-0">
-      <table className="w-full text-xs border-collapse min-w-[1100px]">
+      <table className="w-full text-[13px] border-collapse min-w-[1100px]">
         <thead className="sticky top-0 z-10">
           <tr style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border2)' }}
               className="text-[11px] uppercase tracking-wider">
@@ -57,7 +56,7 @@ export default function OrderTable({ order, onChange, hasOrder }: Props) {
                 color: 'var(--accent)',
                 borderLeft: '1px solid var(--border)',
                 borderRight: '1px solid var(--border)',
-                background: 'var(--surface2)',
+                background: '#F9F5FF',
               }}
             >
               Order
@@ -103,7 +102,7 @@ export default function OrderTable({ order, onChange, hasOrder }: Props) {
                     {category.name}
                   </td>
                   <td className="px-3 py-2 text-center font-bold text-sm"
-                    style={{ color: hasOrders ? 'var(--accent)' : 'transparent', borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)' }}
+                    style={{ color: hasOrders ? 'var(--accent)' : 'transparent', borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: '#F9F5FF' }}
                   >
                     {hasOrders ? totals.boxes : ''}
                   </td>
@@ -131,7 +130,7 @@ export default function OrderTable({ order, onChange, hasOrder }: Props) {
                       key={product.article}
                       className="transition-colors duration-100"
                       style={{
-                        background: ordered ? '#F5F3FF' : 'var(--surface)',
+                        background: ordered ? '#EEF2FF' : 'var(--surface)',
                         borderBottom: '1px solid var(--border)',
                         borderLeft: ordered ? '3px solid var(--accent)' : '3px solid transparent',
                       }}
@@ -146,14 +145,14 @@ export default function OrderTable({ order, onChange, hasOrder }: Props) {
                       <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.packsInBox}</td>
                       <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.boxesOnPallet}</td>
                       <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.weightBoxGross}</td>
-                      <td className="px-3 py-2" style={{ borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)' }}>
+                      <td className="px-3 py-2" style={{ borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: '#F9F5FF' }}>
                         <label className="sr-only" htmlFor={`order-${product.article}`}>Order boxes for {product.sku}</label>
                         <input
                           id={`order-${product.article}`}
                           type="number"
                           min={0}
                           value={boxes === 0 ? '' : boxes}
-                          placeholder="0"
+                          onFocus={(e) => e.target.select()}
                           onChange={(e) => {
                             const v = parseInt(e.target.value, 10)
                             onChange(product.article, isNaN(v) || v < 0 ? 0 : v)
@@ -185,15 +184,6 @@ export default function OrderTable({ order, onChange, hasOrder }: Props) {
               </React.Fragment>
             )
           })}
-          {!hasOrder && (
-            <tr>
-              <td colSpan={13} className="px-4 py-8 text-center text-sm font-medium" style={{ color: 'var(--text3)' }}>
-                Enter quantities in the{' '}
-                <span className="font-semibold" style={{ color: 'var(--cta)' }}>Order (boxes)</span>
-                {' '}column to build your order.
-              </td>
-            </tr>
-          )}
         </tbody>
       </table>
     </div>
