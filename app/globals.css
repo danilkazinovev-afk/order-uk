@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+:root {
+  /* Surfaces — pure white */
+  --bg:        #FFFFFF;
+  --surface:   #FFFFFF;
+  --surface2:  #FAFAFA;
+  --surface3:  #F4F4F5;
+  --border:    #E4E4E7;
+  --border2:   #D1D5DB;
+
+  /* Text — zinc scale */
+  --text:      #09090B;
+  --text2:     #52525B;
+  --text3:     #A1A1AA;
+
+  /* Accent — indigo */
+  --accent:    #4F46E5;
+  --accent2:   #4338CA;
+  --cta:       #4F46E5;
+  --cta2:      #4338CA;
+
+  /* Value — emerald */
+  --value:     #059669;
+  --value2:    #047857;
+
+  /* Category — white bg, colored border + text only */
+  --cat-blue-bg:      #FFFFFF;
+  --cat-blue-text:    #1D4ED8;
+  --cat-blue-border:  #3B82F6;
+  --cat-violet-bg:    #FFFFFF;
+  --cat-violet-text:  #7C3AED;
+  --cat-violet-border:#8B5CF6;
+  --cat-teal-bg:      #FFFFFF;
+  --cat-teal-text:    #0D9488;
+  --cat-teal-border:  #14B8A6;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] { -moz-appearance: textfield; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
+}
