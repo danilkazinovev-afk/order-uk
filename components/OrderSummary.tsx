@@ -89,11 +89,11 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
       role="dialog"
       aria-modal="true"
       aria-labelledby="summary-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
       style={{ background: 'rgba(15,23,42,0.4)', backdropFilter: 'blur(6px)' }}
     >
       <div
-        className="w-full max-w-4xl max-h-[90vh] flex flex-col rounded-2xl"
+        className="w-full sm:max-w-4xl max-h-[95dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-2xl"
         style={{ background: 'var(--surface)', border: '1px solid var(--border2)' }}
       >
         {/* Header */}
@@ -121,7 +121,7 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
         </div>
 
         {/* Contact fields */}
-        <div className="px-6 py-4 grid grid-cols-2 gap-3" style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface2)' }}>
+        <div className="px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface2)' }}>
           <div>
             <label htmlFor="cs-first-name" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>First name</label>
             <input
@@ -235,15 +235,15 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
         )}
 
         {/* Footer */}
-        <div className="px-6 py-4 flex flex-col sm:flex-row gap-2 justify-end items-center" style={{ borderTop: '1px solid var(--border)' }}>
+        <div className="px-4 py-4 flex flex-col sm:flex-row gap-2 sm:justify-end sm:items-center" style={{ borderTop: '1px solid var(--border)' }}>
           {submitError && (
-            <p className="text-sm mr-auto" style={{ color: '#EF4444' }}>
+            <p className="text-sm sm:mr-auto" style={{ color: '#EF4444' }}>
               {submitError}
             </p>
           )}
           <button
             onClick={onClose}
-            className="px-5 py-2.5 rounded-lg font-medium text-sm transition-colors duration-150 cursor-pointer focus:outline-none focus:ring-2"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-lg font-medium text-sm transition-colors duration-150 cursor-pointer focus:outline-none focus:ring-2"
             style={{ border: '1px solid var(--border2)', color: 'var(--text2)', '--tw-ring-color': 'var(--border2)' } as React.CSSProperties}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface3)')}
             onMouseLeave={e => (e.currentTarget.style.background = '')}
@@ -253,7 +253,7 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
           <button
             onClick={handleExport}
             disabled={rows.length === 0}
-            className="px-5 py-2.5 rounded-lg font-medium text-sm text-white transition-colors duration-150 cursor-pointer focus:outline-none focus:ring-2 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-lg font-medium text-sm text-white transition-colors duration-150 cursor-pointer focus:outline-none focus:ring-2 disabled:opacity-30 disabled:cursor-not-allowed"
             style={{ background: 'var(--value)', '--tw-ring-color': 'var(--value)' } as React.CSSProperties}
           >
             Download XLSX
@@ -261,7 +261,7 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
           <button
             onClick={handleConfirm}
             disabled={rows.length === 0 || !!emailError || submitting}
-            className="px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 disabled:opacity-30 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 disabled:opacity-30 disabled:cursor-not-allowed"
             style={{ background: 'var(--cta)', color: '#fff', '--tw-ring-color': 'var(--cta)' } as React.CSSProperties}
           >
             {submitting ? 'Sending…' : 'Confirm & Send Order Form'}
