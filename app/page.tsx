@@ -137,9 +137,9 @@ export default function Home() {
       </header>
 
       {/* ── Main content ── */}
-      <main className="flex-1 flex flex-col overflow-y-auto md:overflow-hidden md:p-4 min-h-0">
+      <main className="flex-1 min-h-0 overflow-y-auto md:overflow-hidden md:p-4 md:flex md:flex-col">
         <div
-          className="md:flex-1 md:rounded-xl md:overflow-hidden relative"
+          className="relative md:flex-1 md:rounded-xl md:overflow-hidden"
           style={{ border: '1px solid var(--border)', background: 'var(--surface)', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
         >
           <OrderTable order={order} onChange={handleChange} />
