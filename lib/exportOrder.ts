@@ -2,8 +2,21 @@ import * as XLSX from 'xlsx'
 import { categories } from '@/data/products'
 import { calcRow, calcCategoryTotals, calcGrandTotals, OrderState } from './calculations'
 
-export function exportOrderXlsx(order: OrderState, clientName: string) {
+interface ContactInfo {
+  firstName: string
+  lastName: string
+  email: string
+  company: string
+}
+
+export function exportOrderXlsx(order: OrderState, clientName: string, contact?: ContactInfo) {
   const rows: (string | number)[][] = []
+
+  if (contact) {
+    rows.push(['First Name', contact.firstName, '', 'Last Name', contact.lastName])
+    rows.push(['Email', contact.email, '', 'Company', contact.company])
+    rows.push([])
+  }
 
   const header = [
     'Article', 'Bar code', 'SKU',

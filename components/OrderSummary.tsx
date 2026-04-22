@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { OrderState, getOrderedRows, calcGrandTotals } from '@/lib/calculations'
 import { exportOrderXlsx } from '@/lib/exportOrder'
 
@@ -10,12 +11,78 @@ interface Props {
   onReset: () => void
 }
 
+const inputCls = "w-full px-3 py-2 rounded-lg text-sm transition-all duration-150 focus:outline-none focus:ring-2"
+const inputStyle = (hasError?: boolean): React.CSSProperties => ({
+  background: 'var(--surface2)',
+  border: `1px solid ${hasError ? '#EF4444' : 'var(--border2)'}`,
+  color: 'var(--text)',
+  ['--tw-ring-color' as string]: hasError ? '#EF4444' : 'var(--accent)',
+})
+
+function validateEmail(v: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())
+}
+
 export default function OrderSummary({ order, clientName, onClose, onReset }: Props) {
   const rows = getOrderedRows(order)
   const grand = calcGrandTotals(order)
 
-  function handleExport() { exportOrderXlsx(order, clientName) }
-  function handleConfirm() { handleExport(); onReset(); onClose() }
+  const [firstName, setFirstName]   = useState('')
+  const [lastName, setLastName]     = useState('')
+  const [email, setEmail]           = useState('')
+  const [company, setCompany]       = useState('')
+  const [emailTouched, setEmailTouched] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+
+  const emailError = emailTouched && email.length > 0 && !validateEmail(email)
+  const contact = { firstName, lastName, email, company }
+
+  function handleExport() { exportOrderXlsx(order, clientName, contact) }
+
+  async function handleConfirm() {
+    setSubmitting(true)
+    setSubmitError(null)
+    try {
+      const res = await fetch('/api/submit-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          clientName,
+          contact,
+          items: rows.map((r) => ({
+            article:      r.product.article,
+            barcode:      r.product.barcode,
+            sku:          r.product.sku,
+            categoryName: r.categoryName,
+            boxes:        r.boxes,
+            packs:        r.packs,
+            pallets:      r.pallets,
+            weightGross:  r.weightGross,
+            totalValue:   r.totalValue,
+          })),
+          totals: {
+            boxes:       grand.boxes,
+            packs:       grand.packs,
+            pallets:     grand.pallets,
+            weightGross: grand.weightGross,
+            totalValue:  grand.totalValue,
+          },
+        }),
+      })
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(error ?? `HTTP ${res.status}`)
+      }
+      handleExport()
+      onReset()
+      onClose()
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : 'Submission failed')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <div
@@ -51,6 +118,70 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
               <path d="M3 3l12 12M15 3L3 15" />
             </svg>
           </button>
+        </div>
+
+        {/* Contact fields */}
+        <div className="px-6 py-4 grid grid-cols-2 gap-3" style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface2)' }}>
+          <div>
+            <label htmlFor="cs-first-name" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>First name</label>
+            <input
+              id="cs-first-name"
+              type="text"
+              autoComplete="given-name"
+              placeholder="Jane"
+              value={firstName}
+              onChange={e => setFirstName(e.target.value)}
+              className={inputCls}
+              style={inputStyle()}
+            />
+          </div>
+          <div>
+            <label htmlFor="cs-last-name" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Last name</label>
+            <input
+              id="cs-last-name"
+              type="text"
+              autoComplete="family-name"
+              placeholder="Smith"
+              value={lastName}
+              onChange={e => setLastName(e.target.value)}
+              className={inputCls}
+              style={inputStyle()}
+            />
+          </div>
+          <div>
+            <label htmlFor="cs-email" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Email</label>
+            <input
+              id="cs-email"
+              type="email"
+              autoComplete="email"
+              placeholder="jane@company.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              onBlur={() => setEmailTouched(true)}
+              className={inputCls}
+              style={inputStyle(emailError)}
+              aria-invalid={emailError}
+              aria-describedby={emailError ? 'cs-email-error' : undefined}
+            />
+            {emailError && (
+              <p id="cs-email-error" className="mt-1 text-[11px]" style={{ color: '#EF4444' }}>
+                Please enter a valid email address.
+              </p>
+            )}
+          </div>
+          <div>
+            <label htmlFor="cs-company" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Company name</label>
+            <input
+              id="cs-company"
+              type="text"
+              autoComplete="organization"
+              placeholder="Acme Ltd."
+              value={company}
+              onChange={e => setCompany(e.target.value)}
+              className={inputCls}
+              style={inputStyle()}
+            />
+          </div>
         </div>
 
         {/* Table */}
@@ -104,7 +235,12 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
         )}
 
         {/* Footer */}
-        <div className="px-6 py-4 flex flex-col sm:flex-row gap-2 justify-end" style={{ borderTop: '1px solid var(--border)' }}>
+        <div className="px-6 py-4 flex flex-col sm:flex-row gap-2 justify-end items-center" style={{ borderTop: '1px solid var(--border)' }}>
+          {submitError && (
+            <p className="text-sm mr-auto" style={{ color: '#EF4444' }}>
+              {submitError}
+            </p>
+          )}
           <button
             onClick={onClose}
             className="px-5 py-2.5 rounded-lg font-medium text-sm transition-colors duration-150 cursor-pointer focus:outline-none focus:ring-2"
@@ -118,17 +254,17 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
             onClick={handleExport}
             disabled={rows.length === 0}
             className="px-5 py-2.5 rounded-lg font-medium text-sm text-white transition-colors duration-150 cursor-pointer focus:outline-none focus:ring-2 disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{ background: 'var(--accent)', '--tw-ring-color': 'var(--accent)' } as React.CSSProperties}
+            style={{ background: 'var(--value)', '--tw-ring-color': 'var(--value)' } as React.CSSProperties}
           >
             Download XLSX
           </button>
           <button
             onClick={handleConfirm}
-            disabled={rows.length === 0}
+            disabled={rows.length === 0 || !!emailError || submitting}
             className="px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 disabled:opacity-30 disabled:cursor-not-allowed"
-            style={{ background: 'var(--cta)', color: '#0A0B12', '--tw-ring-color': 'var(--cta)' } as React.CSSProperties}
+            style={{ background: 'var(--cta)', color: '#fff', '--tw-ring-color': 'var(--cta)' } as React.CSSProperties}
           >
-            Confirm & Export
+            {submitting ? 'Sending…' : 'Confirm & Send Order Form'}
           </button>
         </div>
       </div>
