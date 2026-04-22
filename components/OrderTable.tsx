@@ -10,7 +10,6 @@ interface Props {
 }
 
 const CATEGORY_THEME: Record<string, { bg: string; text: string; border: string }> = {
-  'tea-family':       { bg: 'var(--cat-blue-bg)',    text: 'var(--cat-blue-text)',    border: 'var(--cat-blue-border)' },
   'sherlock-leaf':    { bg: 'var(--cat-amber-bg)',   text: 'var(--cat-amber-text)',   border: 'var(--cat-amber-border)' },
   'sherlock-teabags': { bg: 'var(--cat-orange-bg)',  text: 'var(--cat-orange-text)',  border: 'var(--cat-orange-border)' },
   'sherlock-sachets': { bg: 'var(--cat-rose-bg)',    text: 'var(--cat-rose-text)',    border: 'var(--cat-rose-border)' },
@@ -51,7 +50,7 @@ export default function OrderTable({ order, onChange }: Props) {
               </th>
             ))}
             <th scope="col"
-              className="px-3 py-3 text-center font-bold w-24 text-sm normal-case tracking-normal"
+              className="px-3 py-3 text-center font-bold w-30 text-sm normal-case tracking-normal"
               style={{
                 color: 'var(--accent)',
                 borderLeft: '1px solid var(--border)',
@@ -61,6 +60,7 @@ export default function OrderTable({ order, onChange }: Props) {
             >
               Order
               <span className="block font-normal text-[10px] uppercase tracking-wider" style={{ color: 'var(--accent2)' }}>boxes</span>
+              <span className="block font-normal normal-case tracking-normal text-[9px] mt-0.5" style={{ color: 'var(--text3)' }}>(Enter quantities to build your order)</span>
             </th>
             {[
               { label: 'Packs',   sub: '',        w: 'w-20' },
@@ -98,7 +98,7 @@ export default function OrderTable({ order, onChange }: Props) {
                   borderTop: '2px solid var(--border)',
                   borderBottom: '1px solid var(--border)',
                 }}>
-                  <td colSpan={8} className="px-4 py-2 font-semibold text-[12px] tracking-wide" style={{ color: theme.text }}>
+                  <td colSpan={8} className="px-4 py-2 font-semibold text-[14px] tracking-wide" style={{ color: theme.text }}>
                     {category.name}
                   </td>
                   <td className="px-3 py-2 text-center font-bold text-sm"
@@ -130,41 +130,62 @@ export default function OrderTable({ order, onChange }: Props) {
                       key={product.article}
                       className="transition-colors duration-100"
                       style={{
-                        background: ordered ? '#EEF2FF' : 'var(--surface)',
+                        background: ordered ? '#F0FDF4' : 'var(--surface)',
                         borderBottom: '1px solid var(--border)',
-                        borderLeft: ordered ? '3px solid var(--accent)' : '3px solid transparent',
+                        borderLeft: ordered ? '3px solid #22C55E' : '3px solid transparent',
                       }}
                       onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface3)' }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ordered ? '#F5F3FF' : 'var(--surface)' }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ordered ? '#F0FDF4' : 'var(--surface)' }}
                     >
                       <td className="px-3 py-2 font-mono text-[11px]" style={{ color: 'var(--text3)' }}>{product.article}</td>
                       <td className="px-3 py-2 font-mono text-[11px]" style={{ color: 'var(--text3)' }}>{product.barcode}</td>
-                      <td className="px-3 py-2 font-medium leading-snug" style={{ color: 'var(--text)' }}>{product.sku}</td>
+                      <td className="px-3 py-2 font-medium leading-snug text-[15px]" style={{ color: 'var(--text)' }}>{product.sku}</td>
                       <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.weightPcs}</td>
                       <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.pricePerPack.toFixed(2)}</td>
                       <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.packsInBox}</td>
                       <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.boxesOnPallet}</td>
                       <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.weightBoxGross}</td>
-                      <td className="px-3 py-2" style={{ borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: '#F9F5FF' }}>
+                      <td className="px-2 py-2" style={{ borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: ordered ? '#DCFCE7' : '#F9F5FF' }}>
                         <label className="sr-only" htmlFor={`order-${product.article}`}>Order boxes for {product.sku}</label>
-                        <input
-                          id={`order-${product.article}`}
-                          type="number"
-                          min={0}
-                          value={boxes === 0 ? '' : boxes}
-                          onFocus={(e) => e.target.select()}
-                          onChange={(e) => {
-                            const v = parseInt(e.target.value, 10)
-                            onChange(product.article, isNaN(v) || v < 0 ? 0 : v)
-                          }}
-                          className="w-full text-center rounded-lg px-2 py-1.5 font-semibold tabular-nums transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2"
-                          style={{
-                            background: 'var(--surface)',
-                            border: '1.5px solid var(--border2)',
-                            color: 'var(--text)',
-                            '--tw-ring-color': 'var(--accent)',
-                          } as React.CSSProperties}
-                        />
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            aria-label="Decrease"
+                            onClick={() => onChange(product.article, Math.max(0, boxes - 1))}
+                            className="shrink-0 w-5 h-5 flex items-center justify-center rounded text-base leading-none cursor-pointer focus:outline-none transition-colors duration-100"
+                            style={{ color: 'var(--text3)', background: 'transparent' }}
+                            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+                            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text3)')}
+                          >−</button>
+                          <input
+                            id={`order-${product.article}`}
+                            type="number"
+                            min={0}
+                            value={boxes === 0 ? '' : boxes}
+                            onFocus={(e) => e.target.select()}
+                            onChange={(e) => {
+                              const v = parseInt(e.target.value, 10)
+                              onChange(product.article, isNaN(v) || v < 0 ? 0 : v)
+                            }}
+                            className="w-full text-center rounded-lg px-2 py-1.5 font-semibold tabular-nums transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2"
+                            style={{
+                              background: 'var(--surface)',
+                              border: '1.5px solid var(--border2)',
+                              color: 'var(--text)',
+                              '--tw-ring-color': 'var(--accent)',
+                              minWidth: 0,
+                            } as React.CSSProperties}
+                          />
+                          <button
+                            type="button"
+                            aria-label="Increase"
+                            onClick={() => onChange(product.article, boxes + 1)}
+                            className="shrink-0 w-5 h-5 flex items-center justify-center rounded text-base leading-none cursor-pointer focus:outline-none transition-colors duration-100"
+                            style={{ color: 'var(--text3)', background: 'transparent' }}
+                            onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+                            onMouseLeave={e => (e.currentTarget.style.color = 'var(--text3)')}
+                          >+</button>
+                        </div>
                       </td>
                       <td className="px-3 py-2 text-right font-medium tabular-nums" style={{ color: calc.packs > 0 ? 'var(--text)' : 'var(--text3)' }}>
                         {fmt(calc.packs, 0) ?? ''}

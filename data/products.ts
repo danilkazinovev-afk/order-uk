@@ -18,23 +18,6 @@ export interface Category {
 
 export const categories: Category[] = [
   {
-    id: 'tea-family',
-    name: 'Tea Family',
-    color: 'bg-blue-700',
-    products: [
-      { article: '13405102', barcode: '4823118605488', sku: "Tea ТМ Tea Family 'Green Tea' green loose leaf", weightPcs: 80, pricePerPack: 0.59, packsInBox: 24, boxesOnPallet: 72, weightBoxGross: 2.7 },
-      { article: '13404102', barcode: '4823118605471', sku: "Tea Family 'Black Tea' black loose leaf", weightPcs: 80, pricePerPack: 0.59, packsInBox: 24, boxesOnPallet: 72, weightBoxGross: 2.7 },
-      { article: '13401216', barcode: '4823118602180', sku: 'Tea ТМ Tea Family «Black tea» 150 g. (100 tea bags.*1,5 g.)', weightPcs: 150, pricePerPack: 1.37, packsInBox: 10, boxesOnPallet: 72, weightBoxGross: 2.6 },
-      { article: '13401211', barcode: '4823118605860', sku: 'Tea Family Black tea 37,5 g. (25 tea bags.*1,5g.)', weightPcs: 37.5, pricePerPack: 0.37, packsInBox: 18, boxesOnPallet: 210, weightBoxGross: 1.2 },
-      { article: '13400211', barcode: '4823118605891', sku: 'Tea Family «Bergamot» 37,5 g. (25 tea bags.*1,5g.)', weightPcs: 37.5, pricePerPack: 0.37, packsInBox: 18, boxesOnPallet: 210, weightBoxGross: 1.2 },
-      { article: '13402210', barcode: '4823118602227', sku: 'Tea Family Lemon 30 g. (20 pot*1,5g.)', weightPcs: 30, pricePerPack: 0.32, packsInBox: 24, boxesOnPallet: 132, weightBoxGross: 1.2 },
-      { article: '13403210', barcode: '4823118602241', sku: 'Tea Family «Raspberry» 30 g. (20 pot*1,5g.)', weightPcs: 30, pricePerPack: 0.32, packsInBox: 24, boxesOnPallet: 132, weightBoxGross: 1.2 },
-      { article: '13406248', barcode: '4823118605525', sku: 'Tea Family Camomile 30 g. (20 pot*1,5g.)', weightPcs: 20, pricePerPack: 0.32, packsInBox: 24, boxesOnPallet: 117, weightBoxGross: 1.1 },
-      { article: '13407248', barcode: '4823118605549', sku: 'Tea Family Mint 30 g. (20 pot*1,5g.)', weightPcs: 20, pricePerPack: 0.32, packsInBox: 24, boxesOnPallet: 117, weightBoxGross: 1.1 },
-      { article: '13409179', barcode: '4823118607338', sku: 'Tea Family «Karkade» 70 g', weightPcs: 70, pricePerPack: 0.46, packsInBox: 40, boxesOnPallet: 30, weightBoxGross: 3.3 },
-    ],
-  },
-  {
     id: 'sherlock-leaf',
     name: 'Sherlock Secrets leaf',
     color: 'bg-orange-700',

@@ -41,14 +41,14 @@ export default function Home() {
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: 'var(--bg)' }}>
       <header className="shrink-0 z-40" style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
-        <div className="px-5 py-1.5 text-[12px] font-medium" style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border)', color: 'var(--text3)' }}>
-          Enter quantities in the <span className="font-semibold" style={{ color: 'var(--cta)' }}>Order (boxes)</span> column to build your order.
-        </div>
         <div className="px-5 py-3 flex flex-wrap items-center gap-4">
 
           {/* Brand + client name */}
           <div className="flex items-center gap-4 flex-1 min-w-0">
-            <Image src="/logo.png" alt="Logo" width={72} height={72} className="rounded-lg shrink-0" />
+            <Image src="/logo.jpg" alt="Logo" width={72} height={72} className="rounded-lg shrink-0" />
+            <Image src="/sherlock.png" alt="Sherlock Secrets" width={48} height={48} className="rounded-md shrink-0 object-contain" style={{ marginTop: '5px' }} />
+            <Image src="/tea-moments.png" alt="Tea Moments" width={48} height={48} className="rounded-md shrink-0 object-contain" style={{ marginTop: '-2px' }} />
+            <div className="h-5 w-px" style={{ background: 'var(--border2)' }} />
             <div className="flex flex-col leading-none">
               <span className="font-bold text-[17px] tracking-tight" style={{ color: 'var(--text)' }}>Tea Order Form</span>
               <span className="text-[12px] uppercase tracking-widest font-medium mt-0.5" style={{ color: 'var(--text3)' }}>Wholesale</span>
