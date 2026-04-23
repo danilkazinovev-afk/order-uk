@@ -20,6 +20,27 @@ const CATEGORY_THEME: Record<string, { bg: string; text: string; border: string 
   'tm-tube':          { bg: 'var(--cat-cyan-bg)',    text: 'var(--cat-cyan-text)',    border: 'var(--cat-cyan-border)' },
 }
 
+// Shared column widths for all desktop tables (col 3 = SKU, flexible)
+const COL_WIDTHS = [96, 144, null, 80, 96, 80, 88, 88, 120, 80, 80, 96, 112] as const
+
+const TABLE_STYLE: React.CSSProperties = {
+  tableLayout: 'fixed',
+  width: '100%',
+  minWidth: '1160px',
+  borderCollapse: 'collapse',
+  fontSize: '13px',
+}
+
+function ColGroup() {
+  return (
+    <colgroup>
+      {COL_WIDTHS.map((w, i) => (
+        <col key={i} style={w ? { width: `${w}px` } : undefined} />
+      ))}
+    </colgroup>
+  )
+}
+
 function fmt(n: number, decimals = 2) {
   return n > 0 ? n.toFixed(decimals) : null
 }
@@ -44,7 +65,7 @@ function ChevronIcon({ collapsed }: { collapsed: boolean }) {
       width="13" height="13" viewBox="0 0 13 13" fill="none"
       style={{
         transform: collapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
-        transition: 'transform 150ms ease',
+        transition: 'transform 200ms ease',
         flexShrink: 0,
       }}
     >
@@ -156,77 +177,87 @@ export default function OrderTable({ order, onChange }: Props) {
                 )}
               </div>
 
-              {/* Product cards */}
-              {!isCollapsed && category.products.map((product) => {
-                const boxes = order[product.article] ?? 0
-                const calc = calcRow(product, boxes)
-                const ordered = boxes > 0
-                return (
-                  <div
-                    key={product.article}
-                    className="px-4 py-3"
-                    style={{
-                      background: ordered ? '#F0FDF4' : 'var(--surface)',
-                      borderBottom: '1px solid var(--border)',
-                      borderLeft: ordered ? '3px solid #22C55E' : '3px solid transparent',
-                    }}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0 pt-0.5">
-                        <div className="font-medium text-[14px] leading-snug" style={{ color: 'var(--text)' }}>{product.sku}</div>
-                        <div className="text-[11px] font-mono mt-0.5" style={{ color: 'var(--text3)' }}>
-                          {product.article} · {product.barcode}
+              {/* Animated product cards */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateRows: isCollapsed ? '0fr' : '1fr',
+                  transition: 'grid-template-rows 280ms ease',
+                }}
+              >
+                <div style={{ overflow: 'hidden' }}>
+                  {category.products.map((product) => {
+                    const boxes = order[product.article] ?? 0
+                    const calc = calcRow(product, boxes)
+                    const ordered = boxes > 0
+                    return (
+                      <div
+                        key={product.article}
+                        className="px-4 py-3"
+                        style={{
+                          background: ordered ? '#F0FDF4' : 'var(--surface)',
+                          borderBottom: '1px solid var(--border)',
+                          borderLeft: ordered ? '3px solid #22C55E' : '3px solid transparent',
+                        }}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0 pt-0.5">
+                            <div className="font-medium text-[14px] leading-snug" style={{ color: 'var(--text)' }}>{product.sku}</div>
+                            <div className="text-[11px] font-mono mt-0.5" style={{ color: 'var(--text3)' }}>
+                              {product.article} · {product.barcode}
+                            </div>
+                            <div className="flex flex-wrap gap-x-3 mt-1 text-[11px]" style={{ color: 'var(--text2)' }}>
+                              <span>€{product.pricePerPack.toFixed(2)}/pack</span>
+                              <span>{product.packsInBox} packs/box</span>
+                              <span>{product.weightBoxGross} kg/box</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button type="button" aria-label="Decrease"
+                              onClick={() => onChange(product.article, Math.max(0, boxes - 1))}
+                              className="w-9 h-9 flex items-center justify-center rounded-lg text-lg font-medium cursor-pointer focus:outline-none transition-colors duration-100"
+                              style={{ border: '1px solid var(--border2)', color: 'var(--text3)', background: 'var(--surface2)' }}
+                            >−</button>
+                            <input
+                              type="number" min={0}
+                              value={boxes === 0 ? '' : boxes}
+                              data-order-input={product.article}
+                              onFocus={(e) => e.target.select()}
+                              onWheel={(e) => e.currentTarget.blur()}
+                              onKeyDown={(e) => handleOrderTab(product.article, e)}
+                              onChange={(e) => {
+                                const v = parseInt(e.target.value, 10)
+                                onChange(product.article, isNaN(v) || v < 0 ? 0 : Math.min(v, 299))
+                              }}
+                              className="w-14 text-center rounded-lg py-2 font-semibold tabular-nums focus:outline-none focus:ring-2"
+                              placeholder="0"
+                              style={{
+                                background: ordered ? '#DCFCE7' : '#F9F5FF',
+                                border: '1.5px solid var(--border2)',
+                                color: 'var(--text)',
+                                ['--tw-ring-color' as string]: 'var(--accent)',
+                              }}
+                            />
+                            <button type="button" aria-label="Increase"
+                              onClick={() => onChange(product.article, Math.min(boxes + 1, 299))}
+                              className="w-9 h-9 flex items-center justify-center rounded-lg text-lg font-medium cursor-pointer focus:outline-none transition-colors duration-100"
+                              style={{ border: '1px solid var(--border2)', color: 'var(--text3)', background: 'var(--surface2)' }}
+                            >+</button>
+                          </div>
                         </div>
-                        <div className="flex flex-wrap gap-x-3 mt-1 text-[11px]" style={{ color: 'var(--text2)' }}>
-                          <span>€{product.pricePerPack.toFixed(2)}/pack</span>
-                          <span>{product.packsInBox} packs/box</span>
-                          <span>{product.weightBoxGross} kg/box</span>
-                        </div>
+                        {ordered && (
+                          <div className="flex gap-4 mt-2 text-[12px] tabular-nums">
+                            <span style={{ color: 'var(--text2)' }}>{calc.packs} packs</span>
+                            <span style={{ color: 'var(--text3)' }}>{calc.pallets.toFixed(3)} pal</span>
+                            <span style={{ color: 'var(--text2)' }}>{calc.weightGross.toFixed(2)} kg</span>
+                            <span className="font-semibold" style={{ color: 'var(--value)' }}>€{calc.totalValue.toFixed(2)}</span>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button type="button" aria-label="Decrease"
-                          onClick={() => onChange(product.article, Math.max(0, boxes - 1))}
-                          className="w-9 h-9 flex items-center justify-center rounded-lg text-lg font-medium cursor-pointer focus:outline-none transition-colors duration-100"
-                          style={{ border: '1px solid var(--border2)', color: 'var(--text3)', background: 'var(--surface2)' }}
-                        >−</button>
-                        <input
-                          type="number" min={0}
-                          value={boxes === 0 ? '' : boxes}
-                          data-order-input={product.article}
-                          onFocus={(e) => e.target.select()}
-                          onWheel={(e) => e.currentTarget.blur()}
-                          onKeyDown={(e) => handleOrderTab(product.article, e)}
-                          onChange={(e) => {
-                            const v = parseInt(e.target.value, 10)
-                            onChange(product.article, isNaN(v) || v < 0 ? 0 : Math.min(v, 299))
-                          }}
-                          className="w-14 text-center rounded-lg py-2 font-semibold tabular-nums focus:outline-none focus:ring-2"
-                          placeholder="0"
-                          style={{
-                            background: ordered ? '#DCFCE7' : '#F9F5FF',
-                            border: '1.5px solid var(--border2)',
-                            color: 'var(--text)',
-                            ['--tw-ring-color' as string]: 'var(--accent)',
-                          }}
-                        />
-                        <button type="button" aria-label="Increase"
-                          onClick={() => onChange(product.article, Math.min(boxes + 1, 299))}
-                          className="w-9 h-9 flex items-center justify-center rounded-lg text-lg font-medium cursor-pointer focus:outline-none transition-colors duration-100"
-                          style={{ border: '1px solid var(--border2)', color: 'var(--text3)', background: 'var(--surface2)' }}
-                        >+</button>
-                      </div>
-                    </div>
-                    {ordered && (
-                      <div className="flex gap-4 mt-2 text-[12px] tabular-nums">
-                        <span style={{ color: 'var(--text2)' }}>{calc.packs} packs</span>
-                        <span style={{ color: 'var(--text3)' }}>{calc.pallets.toFixed(3)} pal</span>
-                        <span style={{ color: 'var(--text2)' }}>{calc.weightGross.toFixed(2)} kg</span>
-                        <span className="font-semibold" style={{ color: 'var(--value)' }}>€{calc.totalValue.toFixed(2)}</span>
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
+                    )
+                  })}
+                </div>
+              </div>
             </div>
           )
         })}
@@ -240,75 +271,84 @@ export default function OrderTable({ order, onChange }: Props) {
           <SearchBar value={query} onChange={setQuery} />
         </div>
 
-        {/* Scrollable table */}
+        {/* Scrollable content */}
         <div className="flex-1 overflow-auto">
-          <table className="w-full text-[13px] border-collapse min-w-[1100px]">
-            <thead className="sticky top-0 z-10">
-              <tr style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border2)' }}
-                  className="text-[11px] uppercase tracking-wider">
-                {[
-                  { label: 'Article',    sub: '',          align: 'left',  w: 'w-24' },
-                  { label: 'Bar code',   sub: '',          align: 'left',  w: 'w-36' },
-                  { label: 'SKU',        sub: '',          align: 'left',  w: 'min-w-[280px]' },
-                  { label: 'Wt pcs',     sub: 'g',         align: 'right', w: 'w-20' },
-                  { label: 'Price/pack', sub: 'EUR',       align: 'right', w: 'w-24' },
-                  { label: 'Packs',      sub: 'in box',    align: 'right', w: 'w-20' },
-                  { label: 'Boxes',      sub: 'on pallet', align: 'right', w: 'w-22' },
-                  { label: 'Box wt',     sub: 'gross kg',  align: 'right', w: 'w-22' },
-                ].map(({ label, sub, align, w }) => (
-                  <th key={label} scope="col"
-                    className={`px-3 py-3 font-semibold ${w} text-${align}`}
-                    style={{ color: 'var(--text2)', borderRight: '1px solid var(--border)' }}
-                  >
-                    {label}
-                    {sub && <span className="block font-normal normal-case" style={{ color: 'var(--text3)' }}>{sub}</span>}
-                  </th>
-                ))}
-                <th scope="col"
-                  className="px-3 py-3 text-center font-bold w-30 text-sm normal-case tracking-normal"
-                  style={{ color: 'var(--accent)', borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: '#F9F5FF' }}
-                >
-                  Order
-                  <span className="block font-normal text-[10px] uppercase tracking-wider" style={{ color: 'var(--accent2)' }}>boxes</span>
-                  <span className="block font-normal normal-case tracking-normal text-[9px] mt-0.5" style={{ color: 'var(--text3)' }}>(Enter quantities to build your order)</span>
-                </th>
-                {[
-                  { label: 'Packs',   sub: '',         w: 'w-20' },
-                  { label: 'Pallets', sub: '',         w: 'w-20' },
-                  { label: 'Weight',  sub: 'gross kg', w: 'w-24' },
-                ].map(({ label, sub, w }) => (
-                  <th key={label} scope="col"
-                    className={`px-3 py-3 text-right font-semibold ${w}`}
-                    style={{ color: 'var(--text2)', borderRight: '1px solid var(--border)' }}
-                  >
-                    {label}
-                    {sub && <span className="block font-normal normal-case" style={{ color: 'var(--text3)' }}>{sub}</span>}
-                  </th>
-                ))}
-                <th scope="col" className="px-3 py-3 text-right font-bold w-28"
-                  style={{ background: 'var(--surface2)', color: 'var(--value)' }}
-                >
-                  Value
-                  <span className="block font-normal text-[10px] uppercase tracking-wider" style={{ color: 'var(--value2)' }}>EUR</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {visibleCategories.length === 0 ? (
-                <tr>
-                  <td colSpan={13} className="py-16 text-center text-sm" style={{ color: 'var(--text3)' }}>
-                    No products match &ldquo;{query}&rdquo;
-                  </td>
-                </tr>
-              ) : visibleCategories.map((category) => {
-                const totals = calcCategoryTotals(category.id, order)
-                const theme = CATEGORY_THEME[category.id] ?? { bg: 'var(--surface2)', text: 'var(--text2)', border: 'var(--border2)' }
-                const hasOrders = totals.boxes > 0
-                const isCollapsed = !searchTerm && !!collapsed[category.id]
 
-                return (
-                  <React.Fragment key={category.id}>
-                    {/* Category header row */}
+          {/* Sticky header — own table so product tables can animate independently */}
+          <div className="sticky top-0 z-10" style={{ background: 'var(--surface2)' }}>
+            <table style={TABLE_STYLE}>
+              <ColGroup />
+              <thead>
+                <tr style={{ background: 'var(--surface2)', borderBottom: '1px solid var(--border2)' }}
+                    className="text-[11px] uppercase tracking-wider">
+                  {[
+                    { label: 'Article',    sub: '',          align: 'left'  },
+                    { label: 'Bar code',   sub: '',          align: 'left'  },
+                    { label: 'SKU',        sub: '',          align: 'left'  },
+                    { label: 'Wt pcs',     sub: 'g',         align: 'right' },
+                    { label: 'Price/pack', sub: 'EUR',       align: 'right' },
+                    { label: 'Packs',      sub: 'in box',    align: 'right' },
+                    { label: 'Boxes',      sub: 'on pallet', align: 'right' },
+                    { label: 'Box wt',     sub: 'gross kg',  align: 'right' },
+                  ].map(({ label, sub, align }) => (
+                    <th key={label} scope="col"
+                      className={`px-3 py-3 font-semibold text-${align}`}
+                      style={{ color: 'var(--text2)', borderRight: '1px solid var(--border)' }}
+                    >
+                      {label}
+                      {sub && <span className="block font-normal normal-case" style={{ color: 'var(--text3)' }}>{sub}</span>}
+                    </th>
+                  ))}
+                  <th scope="col"
+                    className="px-3 py-3 text-center font-bold text-sm normal-case tracking-normal"
+                    style={{ color: 'var(--accent)', borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: '#F9F5FF' }}
+                  >
+                    Order
+                    <span className="block font-normal text-[10px] uppercase tracking-wider" style={{ color: 'var(--accent2)' }}>boxes</span>
+                    <span className="block font-normal normal-case tracking-normal text-[9px] mt-0.5" style={{ color: 'var(--text3)' }}>(Enter quantities to build your order)</span>
+                  </th>
+                  {[
+                    { label: 'Packs',   sub: ''         },
+                    { label: 'Pallets', sub: ''         },
+                    { label: 'Weight',  sub: 'gross kg' },
+                  ].map(({ label, sub }) => (
+                    <th key={label} scope="col"
+                      className="px-3 py-3 text-right font-semibold"
+                      style={{ color: 'var(--text2)', borderRight: '1px solid var(--border)' }}
+                    >
+                      {label}
+                      {sub && <span className="block font-normal normal-case" style={{ color: 'var(--text3)' }}>{sub}</span>}
+                    </th>
+                  ))}
+                  <th scope="col" className="px-3 py-3 text-right font-bold"
+                    style={{ background: 'var(--surface2)', color: 'var(--value)' }}
+                  >
+                    Value
+                    <span className="block font-normal text-[10px] uppercase tracking-wider" style={{ color: 'var(--value2)' }}>EUR</span>
+                  </th>
+                </tr>
+              </thead>
+            </table>
+          </div>
+
+          {/* Category sections */}
+          {visibleCategories.length === 0 ? (
+            <div className="py-16 text-center text-sm" style={{ color: 'var(--text3)' }}>
+              No products match &ldquo;{query}&rdquo;
+            </div>
+          ) : visibleCategories.map((category) => {
+            const totals = calcCategoryTotals(category.id, order)
+            const theme = CATEGORY_THEME[category.id] ?? { bg: 'var(--surface2)', text: 'var(--text2)', border: 'var(--border2)' }
+            const hasOrders = totals.boxes > 0
+            const isCollapsed = !searchTerm && !!collapsed[category.id]
+
+            return (
+              <div key={category.id}>
+
+                {/* Category header row */}
+                <table style={TABLE_STYLE}>
+                  <ColGroup />
+                  <tbody>
                     <tr
                       className="cursor-pointer select-none"
                       onClick={() => toggleCategory(category.id)}
@@ -343,92 +383,108 @@ export default function OrderTable({ order, onChange }: Props) {
                         {hasOrders ? `€${totals.totalValue.toFixed(2)}` : ''}
                       </td>
                     </tr>
+                  </tbody>
+                </table>
 
-                    {/* Product rows */}
-                    {!isCollapsed && category.products.map((product) => {
-                      const boxes = order[product.article] ?? 0
-                      const calc = calcRow(product, boxes)
-                      const ordered = boxes > 0
-                      return (
-                        <tr
-                          key={product.article}
-                          className="transition-colors duration-100"
-                          style={{
-                            background: ordered ? '#F0FDF4' : 'var(--surface)',
-                            borderBottom: '1px solid var(--border)',
-                            borderLeft: ordered ? '3px solid #22C55E' : '3px solid transparent',
-                          }}
-                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface3)' }}
-                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ordered ? '#F0FDF4' : 'var(--surface)' }}
-                        >
-                          <td className="px-3 py-2 font-mono text-[11px]" style={{ color: 'var(--text3)' }}>{product.article}</td>
-                          <td className="px-3 py-2 font-mono text-[11px]" style={{ color: 'var(--text3)' }}>{product.barcode}</td>
-                          <td className="px-3 py-2 font-medium leading-snug text-[15px]" style={{ color: 'var(--text)' }}>{product.sku}</td>
-                          <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.weightPcs}</td>
-                          <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.pricePerPack.toFixed(2)}</td>
-                          <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.packsInBox}</td>
-                          <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.boxesOnPallet}</td>
-                          <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.weightBoxGross}</td>
-                          <td className="px-2 py-2" style={{ borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: ordered ? '#DCFCE7' : '#F9F5FF' }}>
-                            <label className="sr-only" htmlFor={`order-${product.article}`}>Order boxes for {product.sku}</label>
-                            <div className="flex items-center gap-1">
-                              <button type="button" aria-label="Decrease"
-                                onClick={() => onChange(product.article, Math.max(0, boxes - 1))}
-                                className="shrink-0 w-5 h-5 flex items-center justify-center rounded text-base leading-none cursor-pointer focus:outline-none transition-colors duration-100"
-                                style={{ color: 'var(--text3)', background: 'transparent' }}
-                                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-                                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text3)')}
-                              >−</button>
-                              <input
-                                id={`order-${product.article}`}
-                                type="number" min={0}
-                                value={boxes === 0 ? '' : boxes}
-                                data-order-input={product.article}
-                                onFocus={(e) => e.target.select()}
-                                onWheel={(e) => e.currentTarget.blur()}
-                                onKeyDown={(e) => handleOrderTab(product.article, e)}
-                                onChange={(e) => {
-                                  const v = parseInt(e.target.value, 10)
-                                  onChange(product.article, isNaN(v) || v < 0 ? 0 : Math.min(v, 299))
-                                }}
-                                className="w-full text-center rounded-lg px-2 py-1.5 font-semibold tabular-nums transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2"
-                                style={{
-                                  background: 'var(--surface)',
-                                  border: '1.5px solid var(--border2)',
-                                  color: 'var(--text)',
-                                  ['--tw-ring-color' as string]: 'var(--accent)',
-                                  minWidth: 0,
-                                }}
-                              />
-                              <button type="button" aria-label="Increase"
-                                onClick={() => onChange(product.article, Math.min(boxes + 1, 299))}
-                                className="shrink-0 w-5 h-5 flex items-center justify-center rounded text-base leading-none cursor-pointer focus:outline-none transition-colors duration-100"
-                                style={{ color: 'var(--text3)', background: 'transparent' }}
-                                onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
-                                onMouseLeave={e => (e.currentTarget.style.color = 'var(--text3)')}
-                              >+</button>
-                            </div>
-                          </td>
-                          <td className="px-3 py-2 text-right font-medium tabular-nums" style={{ color: calc.packs > 0 ? 'var(--text)' : 'var(--text3)' }}>
-                            {fmt(calc.packs, 0) ?? ''}
-                          </td>
-                          <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text3)' }}>
-                            {fmt(calc.pallets, 3) ?? ''}
-                          </td>
-                          <td className="px-3 py-2 text-right tabular-nums" style={{ color: calc.weightGross > 0 ? 'var(--text2)' : 'var(--text3)' }}>
-                            {fmt(calc.weightGross) ?? ''}
-                          </td>
-                          <td className="px-3 py-2 text-right font-semibold tabular-nums" style={{ color: calc.totalValue > 0 ? 'var(--value)' : 'var(--text3)' }}>
-                            {calc.totalValue > 0 ? `€${calc.totalValue.toFixed(2)}` : ''}
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </React.Fragment>
-                )
-              })}
-            </tbody>
-          </table>
+                {/* Animated product rows */}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateRows: isCollapsed ? '0fr' : '1fr',
+                    transition: 'grid-template-rows 280ms ease',
+                  }}
+                >
+                  <div style={{ overflow: 'hidden' }}>
+                    <table style={TABLE_STYLE}>
+                      <ColGroup />
+                      <tbody>
+                        {category.products.map((product) => {
+                          const boxes = order[product.article] ?? 0
+                          const calc = calcRow(product, boxes)
+                          const ordered = boxes > 0
+                          return (
+                            <tr
+                              key={product.article}
+                              className="transition-colors duration-100"
+                              style={{
+                                background: ordered ? '#F0FDF4' : 'var(--surface)',
+                                borderBottom: '1px solid var(--border)',
+                                borderLeft: ordered ? '3px solid #22C55E' : '3px solid transparent',
+                              }}
+                              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--surface3)' }}
+                              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ordered ? '#F0FDF4' : 'var(--surface)' }}
+                            >
+                              <td className="px-3 py-2 font-mono text-[11px]" style={{ color: 'var(--text3)' }}>{product.article}</td>
+                              <td className="px-3 py-2 font-mono text-[11px]" style={{ color: 'var(--text3)' }}>{product.barcode}</td>
+                              <td className="px-3 py-2 font-medium leading-snug text-[15px]" style={{ color: 'var(--text)' }}>{product.sku}</td>
+                              <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.weightPcs}</td>
+                              <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.pricePerPack.toFixed(2)}</td>
+                              <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.packsInBox}</td>
+                              <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.boxesOnPallet}</td>
+                              <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{product.weightBoxGross}</td>
+                              <td className="px-2 py-2" style={{ borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)', background: ordered ? '#DCFCE7' : '#F9F5FF' }}>
+                                <label className="sr-only" htmlFor={`order-${product.article}`}>Order boxes for {product.sku}</label>
+                                <div className="flex items-center gap-1">
+                                  <button type="button" aria-label="Decrease"
+                                    onClick={() => onChange(product.article, Math.max(0, boxes - 1))}
+                                    className="shrink-0 w-5 h-5 flex items-center justify-center rounded text-base leading-none cursor-pointer focus:outline-none transition-colors duration-100"
+                                    style={{ color: 'var(--text3)', background: 'transparent' }}
+                                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+                                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--text3)')}
+                                  >−</button>
+                                  <input
+                                    id={`order-${product.article}`}
+                                    type="number" min={0}
+                                    value={boxes === 0 ? '' : boxes}
+                                    data-order-input={product.article}
+                                    onFocus={(e) => e.target.select()}
+                                    onWheel={(e) => e.currentTarget.blur()}
+                                    onKeyDown={(e) => handleOrderTab(product.article, e)}
+                                    onChange={(e) => {
+                                      const v = parseInt(e.target.value, 10)
+                                      onChange(product.article, isNaN(v) || v < 0 ? 0 : Math.min(v, 299))
+                                    }}
+                                    className="w-full text-center rounded-lg px-2 py-1.5 font-semibold tabular-nums transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2"
+                                    style={{
+                                      background: 'var(--surface)',
+                                      border: '1.5px solid var(--border2)',
+                                      color: 'var(--text)',
+                                      ['--tw-ring-color' as string]: 'var(--accent)',
+                                      minWidth: 0,
+                                    }}
+                                  />
+                                  <button type="button" aria-label="Increase"
+                                    onClick={() => onChange(product.article, Math.min(boxes + 1, 299))}
+                                    className="shrink-0 w-5 h-5 flex items-center justify-center rounded text-base leading-none cursor-pointer focus:outline-none transition-colors duration-100"
+                                    style={{ color: 'var(--text3)', background: 'transparent' }}
+                                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}
+                                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--text3)')}
+                                  >+</button>
+                                </div>
+                              </td>
+                              <td className="px-3 py-2 text-right font-medium tabular-nums" style={{ color: calc.packs > 0 ? 'var(--text)' : 'var(--text3)' }}>
+                                {fmt(calc.packs, 0) ?? ''}
+                              </td>
+                              <td className="px-3 py-2 text-right tabular-nums" style={{ color: 'var(--text3)' }}>
+                                {fmt(calc.pallets, 3) ?? ''}
+                              </td>
+                              <td className="px-3 py-2 text-right tabular-nums" style={{ color: calc.weightGross > 0 ? 'var(--text2)' : 'var(--text3)' }}>
+                                {fmt(calc.weightGross) ?? ''}
+                              </td>
+                              <td className="px-3 py-2 text-right font-semibold tabular-nums" style={{ color: calc.totalValue > 0 ? 'var(--value)' : 'var(--text3)' }}>
+                                {calc.totalValue > 0 ? `€${calc.totalValue.toFixed(2)}` : ''}
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
+            )
+          })}
         </div>
       </div>
     </>
