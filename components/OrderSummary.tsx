@@ -315,52 +315,81 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
             </div>
           </div>
 
-          {/* Order table */}
+          {/* Order items */}
           {rows.length === 0 ? (
             <div className="flex items-center justify-center py-16 text-[17px] font-medium" style={{ color: 'var(--text3)' }}>
               No items ordered yet.
             </div>
           ) : (
-            <table className="w-full text-sm">
-              <thead className="sticky top-0 z-10">
-                <tr style={{ background: 'var(--surface3)', borderBottom: '1px solid var(--border2)' }}
-                    className="text-[11px] uppercase tracking-wider">
-                  <th scope="col" className="text-left py-3 px-4 font-semibold" style={{ color: 'var(--text2)' }}>SKU</th>
-                  <th scope="col" className="text-right py-3 px-4 font-semibold w-20" style={{ color: 'var(--text2)' }}>Boxes</th>
-                  <th scope="col" className="text-right py-3 px-4 font-semibold w-20" style={{ color: 'var(--text2)' }}>Packs</th>
-                  <th scope="col" className="text-right py-3 px-4 font-semibold w-24" style={{ color: 'var(--text2)' }}>Pallets</th>
-                  <th scope="col" className="text-right py-3 px-4 font-semibold w-28" style={{ color: 'var(--text2)' }}>Weight (kg)</th>
-                  <th scope="col" className="text-right py-3 px-4 font-bold w-28" style={{ background: 'var(--surface2)', color: 'var(--value)' }}>Value (EUR)</th>
-                </tr>
-              </thead>
-              <tbody>
+            <>
+              {/* Mobile card list */}
+              <div className="block sm:hidden">
                 {rows.map((row) => (
-                  <tr key={row.product.article}
-                    className="transition-colors duration-100"
-                    style={{ borderBottom: '1px solid var(--border)' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = '')}
-                  >
-                    <td className="py-2.5 px-4 font-medium leading-snug" style={{ color: 'var(--text)' }}>{row.product.sku}</td>
-                    <td className="py-2.5 px-4 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{row.boxes}</td>
-                    <td className="py-2.5 px-4 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{row.packs}</td>
-                    <td className="py-2.5 px-4 text-right tabular-nums" style={{ color: 'var(--text3)' }}>{row.pallets.toFixed(3)}</td>
-                    <td className="py-2.5 px-4 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{row.weightGross.toFixed(2)}</td>
-                    <td className="py-2.5 px-4 text-right font-semibold tabular-nums" style={{ color: 'var(--value)' }}>€{row.totalValue.toFixed(2)}</td>
-                  </tr>
+                  <div key={row.product.article} className="px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+                    <div className="text-[13px] font-medium leading-snug mb-1" style={{ color: 'var(--text)' }}>{row.product.sku}</div>
+                    <div className="flex items-center justify-between gap-2 text-[12px] tabular-nums">
+                      <div className="flex gap-3" style={{ color: 'var(--text2)' }}>
+                        <span>{row.boxes} boxes</span>
+                        <span>{row.packs} packs</span>
+                        <span style={{ color: 'var(--text3)' }}>{row.weightGross.toFixed(2)} kg</span>
+                      </div>
+                      <span className="font-semibold" style={{ color: 'var(--value)' }}>€{row.totalValue.toFixed(2)}</span>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-              <tfoot>
-                <tr style={{ background: 'var(--surface3)', borderTop: '2px solid var(--border2)' }}>
-                  <td className="py-3 px-4 text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--text)' }}>Grand Total</td>
-                  <td className="py-3 px-4 text-right font-bold tabular-nums" style={{ color: 'var(--text)' }}>{grand.boxes}</td>
-                  <td className="py-3 px-4 text-right font-bold tabular-nums" style={{ color: 'var(--text)' }}>{grand.packs}</td>
-                  <td className="py-3 px-4 text-right tabular-nums" style={{ color: 'var(--text3)' }}>{grand.pallets.toFixed(3)}</td>
-                  <td className="py-3 px-4 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{grand.weightGross.toFixed(2)}</td>
-                  <td className="py-3 px-4 text-right font-bold tabular-nums text-[17px]" style={{ color: 'var(--value)' }}>€{grand.totalValue.toFixed(2)}</td>
-                </tr>
-              </tfoot>
-            </table>
+                <div className="px-4 py-3 flex items-center justify-between" style={{ background: 'var(--surface3)', borderTop: '2px solid var(--border2)' }}>
+                  <div>
+                    <div className="text-[12px] font-bold uppercase tracking-wide" style={{ color: 'var(--text)' }}>Grand Total</div>
+                    <div className="text-[12px] tabular-nums mt-0.5" style={{ color: 'var(--text2)' }}>
+                      {grand.boxes} boxes · {grand.packs} packs · {grand.weightGross.toFixed(2)} kg
+                    </div>
+                  </div>
+                  <span className="text-[17px] font-bold tabular-nums" style={{ color: 'var(--value)' }}>€{grand.totalValue.toFixed(2)}</span>
+                </div>
+              </div>
+
+              {/* Desktop table */}
+              <table className="hidden sm:table w-full text-sm">
+                <thead className="sticky top-0 z-10">
+                  <tr style={{ background: 'var(--surface3)', borderBottom: '1px solid var(--border2)' }}
+                      className="text-[11px] uppercase tracking-wider">
+                    <th scope="col" className="text-left py-3 px-4 font-semibold" style={{ color: 'var(--text2)' }}>SKU</th>
+                    <th scope="col" className="text-right py-3 px-4 font-semibold w-20" style={{ color: 'var(--text2)' }}>Boxes</th>
+                    <th scope="col" className="text-right py-3 px-4 font-semibold w-20" style={{ color: 'var(--text2)' }}>Packs</th>
+                    <th scope="col" className="text-right py-3 px-4 font-semibold w-24" style={{ color: 'var(--text2)' }}>Pallets</th>
+                    <th scope="col" className="text-right py-3 px-4 font-semibold w-28" style={{ color: 'var(--text2)' }}>Weight (kg)</th>
+                    <th scope="col" className="text-right py-3 px-4 font-bold w-28" style={{ background: 'var(--surface2)', color: 'var(--value)' }}>Value (EUR)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row) => (
+                    <tr key={row.product.article}
+                      className="transition-colors duration-100"
+                      style={{ borderBottom: '1px solid var(--border)' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface2)')}
+                      onMouseLeave={e => (e.currentTarget.style.background = '')}
+                    >
+                      <td className="py-2.5 px-4 font-medium leading-snug" style={{ color: 'var(--text)' }}>{row.product.sku}</td>
+                      <td className="py-2.5 px-4 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{row.boxes}</td>
+                      <td className="py-2.5 px-4 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{row.packs}</td>
+                      <td className="py-2.5 px-4 text-right tabular-nums" style={{ color: 'var(--text3)' }}>{row.pallets.toFixed(3)}</td>
+                      <td className="py-2.5 px-4 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{row.weightGross.toFixed(2)}</td>
+                      <td className="py-2.5 px-4 text-right font-semibold tabular-nums" style={{ color: 'var(--value)' }}>€{row.totalValue.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr style={{ background: 'var(--surface3)', borderTop: '2px solid var(--border2)' }}>
+                    <td className="py-3 px-4 text-sm font-bold uppercase tracking-wide" style={{ color: 'var(--text)' }}>Grand Total</td>
+                    <td className="py-3 px-4 text-right font-bold tabular-nums" style={{ color: 'var(--text)' }}>{grand.boxes}</td>
+                    <td className="py-3 px-4 text-right font-bold tabular-nums" style={{ color: 'var(--text)' }}>{grand.packs}</td>
+                    <td className="py-3 px-4 text-right tabular-nums" style={{ color: 'var(--text3)' }}>{grand.pallets.toFixed(3)}</td>
+                    <td className="py-3 px-4 text-right tabular-nums" style={{ color: 'var(--text2)' }}>{grand.weightGross.toFixed(2)}</td>
+                    <td className="py-3 px-4 text-right font-bold tabular-nums text-[17px]" style={{ color: 'var(--value)' }}>€{grand.totalValue.toFixed(2)}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </>
           )}
 
         </div>
