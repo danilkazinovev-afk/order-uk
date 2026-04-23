@@ -28,7 +28,9 @@ export async function GET(request: Request) {
     }
 
     const json = await res.json()
-    const status: string = json?.data?.status ?? 'unknown'
+    // Bouncer v1.1 returns status at the top level; some docs show it nested under data
+    const status: string = json?.status ?? json?.data?.status ?? 'unknown'
+    console.log('Bouncer raw response:', JSON.stringify(json))
     return Response.json({ status })
   } catch (err) {
     clearTimeout(timeoutId)
