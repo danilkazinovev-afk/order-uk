@@ -27,15 +27,33 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
   const rows = getOrderedRows(order)
   const grand = calcGrandTotals(order)
 
-  const [firstName, setFirstName]   = useState('')
-  const [lastName, setLastName]     = useState('')
-  const [email, setEmail]           = useState('')
-  const [company, setCompany]       = useState('')
-  const [emailTouched, setEmailTouched] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [firstName, setFirstName]         = useState('')
+  const [lastName, setLastName]           = useState('')
+  const [email, setEmail]                 = useState('')
+  const [company, setCompany]             = useState('')
+  const [firstNameTouched, setFirstNameTouched] = useState(false)
+  const [lastNameTouched, setLastNameTouched]   = useState(false)
+  const [emailTouched, setEmailTouched]         = useState(false)
+  const [submitting, setSubmitting]       = useState(false)
+  const [submitError, setSubmitError]     = useState<string | null>(null)
 
+  const hasDigits = (v: string) => /\d/.test(v)
+
+  const firstNameError = firstNameTouched
+    ? firstName.trim() === '' ? 'Required'
+    : hasDigits(firstName) ? 'No numbers allowed' : null
+    : null
+  const lastNameError = lastNameTouched
+    ? lastName.trim() === '' ? 'Required'
+    : hasDigits(lastName) ? 'No numbers allowed' : null
+    : null
   const emailError = emailTouched && email.length > 0 && !validateEmail(email)
+
+  const canSubmit =
+    firstName.trim() !== '' && !hasDigits(firstName) &&
+    lastName.trim() !== '' && !hasDigits(lastName) &&
+    email.trim() !== '' && validateEmail(email)
+
   const contact = { firstName, lastName, email, company }
 
   function handleExport() { exportOrderXlsx(order, clientName, contact) }
@@ -134,9 +152,11 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
                 placeholder="Jane"
                 value={firstName}
                 onChange={e => setFirstName(e.target.value)}
+                onBlur={() => setFirstNameTouched(true)}
                 className={inputCls}
-                style={inputStyle()}
+                style={inputStyle(!!firstNameError)}
               />
+              {firstNameError && <p className="mt-1 text-[11px]" style={{ color: '#EF4444' }}>{firstNameError}</p>}
             </div>
             <div>
               <label htmlFor="cs-last-name" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Last name</label>
@@ -147,9 +167,11 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
                 placeholder="Smith"
                 value={lastName}
                 onChange={e => setLastName(e.target.value)}
+                onBlur={() => setLastNameTouched(true)}
                 className={inputCls}
-                style={inputStyle()}
+                style={inputStyle(!!lastNameError)}
               />
+              {lastNameError && <p className="mt-1 text-[11px]" style={{ color: '#EF4444' }}>{lastNameError}</p>}
             </div>
             <div>
               <label htmlFor="cs-email" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Email</label>
@@ -263,7 +285,7 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
           </button>
           <button
             onClick={handleConfirm}
-            disabled={rows.length === 0 || !!emailError || submitting}
+            disabled={rows.length === 0 || !canSubmit || submitting}
             className="w-full sm:w-auto px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 disabled:opacity-30 disabled:cursor-not-allowed"
             style={{ background: 'var(--cta)', color: '#fff', '--tw-ring-color': 'var(--cta)' } as React.CSSProperties}
           >

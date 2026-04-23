@@ -24,6 +24,19 @@ function fmt(n: number, decimals = 2) {
   return n > 0 ? n.toFixed(decimals) : null
 }
 
+function handleOrderTab(article: string, e: React.KeyboardEvent<HTMLInputElement>) {
+  if (e.key !== 'Tab') return
+  const inputs = Array.from(document.querySelectorAll<HTMLInputElement>('[data-order-input]'))
+  const idx = inputs.findIndex(el => el.dataset.orderInput === article)
+  if (idx < 0) return
+  const next = e.shiftKey ? inputs[idx - 1] : inputs[idx + 1]
+  if (next) {
+    e.preventDefault()
+    next.focus()
+    next.select()
+  }
+}
+
 export default function OrderTable({ order, onChange }: Props) {
   return (
     <>
@@ -96,10 +109,12 @@ export default function OrderTable({ order, onChange }: Props) {
                           type="number"
                           min={0}
                           value={boxes === 0 ? '' : boxes}
+                          data-order-input={product.article}
                           onFocus={(e) => e.target.select()}
+                          onKeyDown={(e) => handleOrderTab(product.article, e)}
                           onChange={(e) => {
                             const v = parseInt(e.target.value, 10)
-                            onChange(product.article, isNaN(v) || v < 0 ? 0 : Math.min(v, 99))
+                            onChange(product.article, isNaN(v) || v < 0 ? 0 : Math.min(v, 299))
                           }}
                           className="w-14 text-center rounded-lg py-2 font-semibold tabular-nums focus:outline-none focus:ring-2"
                           placeholder="0"
@@ -113,7 +128,7 @@ export default function OrderTable({ order, onChange }: Props) {
                         <button
                           type="button"
                           aria-label="Increase"
-                          onClick={() => onChange(product.article, Math.min(boxes + 1, 99))}
+                          onClick={() => onChange(product.article, Math.min(boxes + 1, 299))}
                           className="w-9 h-9 flex items-center justify-center rounded-lg text-lg font-medium cursor-pointer focus:outline-none transition-colors duration-100"
                           style={{ border: '1px solid var(--border2)', color: 'var(--text3)', background: 'var(--surface2)' }}
                         >+</button>
@@ -273,10 +288,12 @@ export default function OrderTable({ order, onChange }: Props) {
                               type="number"
                               min={0}
                               value={boxes === 0 ? '' : boxes}
+                              data-order-input={product.article}
                               onFocus={(e) => e.target.select()}
+                              onKeyDown={(e) => handleOrderTab(product.article, e)}
                               onChange={(e) => {
                                 const v = parseInt(e.target.value, 10)
-                                onChange(product.article, isNaN(v) || v < 0 ? 0 : Math.min(v, 99))
+                                onChange(product.article, isNaN(v) || v < 0 ? 0 : Math.min(v, 299))
                               }}
                               className="w-full text-center rounded-lg px-2 py-1.5 font-semibold tabular-nums transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2"
                               style={{
@@ -290,7 +307,7 @@ export default function OrderTable({ order, onChange }: Props) {
                             <button
                               type="button"
                               aria-label="Increase"
-                              onClick={() => onChange(product.article, Math.min(boxes + 1, 99))}
+                              onClick={() => onChange(product.article, Math.min(boxes + 1, 299))}
                               className="shrink-0 w-5 h-5 flex items-center justify-center rounded text-base leading-none cursor-pointer focus:outline-none transition-colors duration-100"
                               style={{ color: 'var(--text3)', background: 'transparent' }}
                               onMouseEnter={e => (e.currentTarget.style.color = 'var(--text)')}

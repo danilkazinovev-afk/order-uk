@@ -77,8 +77,18 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Invalid input' }, { status: 400 })
   }
 
+  // Required fields
+  if (!contact.firstName.trim() || !contact.lastName.trim() || !contact.email.trim()) {
+    return Response.json({ error: 'First name, last name and email are required' }, { status: 400 })
+  }
+
+  // No digits in names
+  if (/\d/.test(contact.firstName) || /\d/.test(contact.lastName)) {
+    return Response.json({ error: 'Names must not contain numbers' }, { status: 400 })
+  }
+
   // Server-side email format validation
-  if (contact.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email.trim())) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email.trim())) {
     return Response.json({ error: 'Invalid email' }, { status: 400 })
   }
 
@@ -94,8 +104,8 @@ export async function POST(request: Request) {
   // Validate all numeric fields — prevents NaN/Infinity crashes in .toFixed()
   // boxes/packs must be positive integers; pallets/weight/value can be decimals
   // Per-item box count: 1–99. Totals are sums across up to 200 items so cap higher.
-  const isItemInt  = (n: unknown) => typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 99
-  const isTotalInt = (n: unknown) => typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 200 * 99
+  const isItemInt  = (n: unknown) => typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 299
+  const isTotalInt = (n: unknown) => typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 200 * 299
   const isDec      = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && n >= 0 && n <= 10_000_000
 
   const totalsOk = isTotalInt(totals?.boxes) && isTotalInt(totals?.packs) &&
