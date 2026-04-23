@@ -182,10 +182,18 @@ export default function OrderTable({ order, onChange }: Props) {
                 style={{
                   display: 'grid',
                   gridTemplateRows: isCollapsed ? '0fr' : '1fr',
-                  transition: 'grid-template-rows 280ms ease',
+                  transition: isCollapsed
+                    ? 'grid-template-rows 320ms cubic-bezier(0.4, 0, 0.2, 1)'
+                    : 'grid-template-rows 480ms cubic-bezier(0.0, 0.0, 0.2, 1)',
                 }}
               >
-                <div style={{ overflow: 'hidden' }}>
+                <div style={{
+                  overflow: 'hidden',
+                  opacity: isCollapsed ? 0 : 1,
+                  transition: isCollapsed
+                    ? 'opacity 200ms ease'
+                    : 'opacity 380ms 100ms ease',
+                }}>
                   {category.products.map((product) => {
                     const boxes = order[product.article] ?? 0
                     const calc = calcRow(product, boxes)
@@ -391,10 +399,18 @@ export default function OrderTable({ order, onChange }: Props) {
                   style={{
                     display: 'grid',
                     gridTemplateRows: isCollapsed ? '0fr' : '1fr',
-                    transition: 'grid-template-rows 280ms ease',
+                    transition: isCollapsed
+                      ? 'grid-template-rows 320ms cubic-bezier(0.4, 0, 0.2, 1)'
+                      : 'grid-template-rows 480ms cubic-bezier(0.0, 0.0, 0.2, 1)',
                   }}
                 >
-                  <div style={{ overflow: 'hidden' }}>
+                  <div style={{
+                    overflow: 'hidden',
+                    opacity: isCollapsed ? 0 : 1,
+                    transition: isCollapsed
+                      ? 'opacity 200ms ease'
+                      : 'opacity 380ms 100ms ease',
+                  }}>
                     <table style={TABLE_STYLE}>
                       <ColGroup />
                       <tbody>
