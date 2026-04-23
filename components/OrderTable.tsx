@@ -26,7 +26,10 @@ function fmt(n: number, decimals = 2) {
 
 function handleOrderTab(article: string, e: React.KeyboardEvent<HTMLInputElement>) {
   if (e.key !== 'Tab') return
+  // offsetParent is null for elements hidden via display:none — filters out the
+  // counterpart view (mobile inputs on desktop, desktop inputs on mobile)
   const inputs = Array.from(document.querySelectorAll<HTMLInputElement>('[data-order-input]'))
+    .filter(el => el.offsetParent !== null)
   const idx = inputs.findIndex(el => el.dataset.orderInput === article)
   if (idx < 0) return
   const next = e.shiftKey ? inputs[idx - 1] : inputs[idx + 1]

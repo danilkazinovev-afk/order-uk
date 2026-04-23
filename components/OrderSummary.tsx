@@ -11,7 +11,7 @@ interface Props {
   onReset: () => void
 }
 
-const inputCls = "w-full px-3 py-2 rounded-lg text-sm transition-all duration-150 focus:outline-none focus:ring-2"
+const inputCls = "w-full px-2 py-2 rounded-lg text-sm transition-all duration-150 focus:outline-none focus:ring-2"
 const inputStyle = (hasError?: boolean): React.CSSProperties => ({
   background: 'var(--surface2)',
   border: `1px solid ${hasError ? '#EF4444' : 'var(--border2)'}`,
@@ -187,7 +187,7 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
       style={{ background: 'rgba(15,23,42,0.4)', backdropFilter: 'blur(6px)' }}
     >
       <div
-        className="w-full sm:max-w-4xl max-h-[95dvh] sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-2xl"
+        className="w-full sm:max-w-4xl h-[95dvh] sm:h-auto sm:max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-2xl"
         style={{ background: 'var(--surface)', border: '1px solid var(--border2)' }}
       >
         {/* Header */}
@@ -218,7 +218,7 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
         <div className="flex-1 overflow-y-auto min-h-0">
 
           {/* Contact fields */}
-          <div className="px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface2)' }}>
+          <div className="px-4 py-4 grid grid-cols-2 gap-3" style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface2)' }}>
             <div>
               <label htmlFor="cs-first-name" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>First name</label>
               <input
