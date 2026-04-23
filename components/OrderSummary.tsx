@@ -123,7 +123,7 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
     if (v !== lastCheckedEmail) setBouncerState(null)
   }
 
-  function handleExport() { exportOrderXlsx(order, clientName, contact) }
+  async function handleExport() { await exportOrderXlsx(order, clientName, contact) }
 
   async function handleConfirm() {
     setSubmitError(null)
@@ -168,7 +168,7 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
         const { error } = await res.json().catch(() => ({ error: 'Unknown error' }))
         throw new Error(error ?? `HTTP ${res.status}`)
       }
-      handleExport()
+      await handleExport()
       onReset()
       onClose()
     } catch (err) {
