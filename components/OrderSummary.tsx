@@ -23,19 +23,51 @@ function validateEmail(v: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())
 }
 
+type BouncerState = null | 'checking' | 'ok' | 'blocked' | 'warn'
+
+function SpinnerIcon() {
+  return (
+    <svg className="animate-spin" width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden>
+      <circle cx="7.5" cy="7.5" r="6" stroke="var(--border2)" strokeWidth="2" />
+      <path d="M7.5 1.5A6 6 0 0 1 13.5 7.5" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden>
+      <circle cx="7.5" cy="7.5" r="6.5" fill="#DCFCE7" />
+      <path d="M4.5 7.5l2.5 2.5 4-4.5" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function WarnIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden>
+      <circle cx="7.5" cy="7.5" r="6.5" fill="#FEF9C3" />
+      <path d="M7.5 4.5v3.5M7.5 10.5h.01" stroke="#CA8A04" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 export default function OrderSummary({ order, clientName, onClose, onReset }: Props) {
   const rows = getOrderedRows(order)
   const grand = calcGrandTotals(order)
 
-  const [firstName, setFirstName]         = useState('')
-  const [lastName, setLastName]           = useState('')
-  const [email, setEmail]                 = useState('')
-  const [company, setCompany]             = useState('')
+  const [firstName, setFirstName]               = useState('')
+  const [lastName, setLastName]                 = useState('')
+  const [email, setEmail]                       = useState('')
+  const [company, setCompany]                   = useState('')
   const [firstNameTouched, setFirstNameTouched] = useState(false)
   const [lastNameTouched, setLastNameTouched]   = useState(false)
   const [emailTouched, setEmailTouched]         = useState(false)
-  const [submitting, setSubmitting]       = useState(false)
-  const [submitError, setSubmitError]     = useState<string | null>(null)
+  const [submitting, setSubmitting]             = useState(false)
+  const [submitError, setSubmitError]           = useState<string | null>(null)
+
+  const [bouncerState, setBouncerState]         = useState<BouncerState>(null)
+  const [lastCheckedEmail, setLastCheckedEmail] = useState('')
 
   const hasDigits = (v: string) => /\d/.test(v)
 
@@ -47,20 +79,64 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
     ? lastName.trim() === '' ? 'Required'
     : hasDigits(lastName) ? 'No numbers allowed' : null
     : null
-  const emailError = emailTouched && email.length > 0 && !validateEmail(email)
+  const emailFormatError = emailTouched && email.length > 0 && !validateEmail(email)
 
   const canSubmit =
     firstName.trim() !== '' && !hasDigits(firstName) &&
     lastName.trim() !== '' && !hasDigits(lastName) &&
-    email.trim() !== '' && validateEmail(email)
+    email.trim() !== '' && validateEmail(email) &&
+    bouncerState !== 'blocked' &&
+    bouncerState !== 'checking'
 
   const contact = { firstName, lastName, email, company }
+
+  async function checkBouncer(emailToCheck: string): Promise<BouncerState> {
+    setBouncerState('checking')
+    try {
+      const res = await fetch(`/api/validate-email?email=${encodeURIComponent(emailToCheck)}`)
+      const data = await res.json()
+      const status: string = res.ok ? (data.status ?? 'unknown') : 'unknown'
+      const next: BouncerState =
+        status === 'deliverable' ? 'ok' :
+        (status === 'undeliverable' || status === 'risky') ? 'blocked' :
+        'warn'
+      setBouncerState(next)
+      setLastCheckedEmail(emailToCheck)
+      return next
+    } catch (err) {
+      console.error('Email validation error:', err)
+      setBouncerState('warn')
+      setLastCheckedEmail(emailToCheck)
+      return 'warn'
+    }
+  }
+
+  async function handleEmailBlur() {
+    setEmailTouched(true)
+    if (email.trim() && validateEmail(email) && email !== lastCheckedEmail) {
+      await checkBouncer(email)
+    }
+  }
+
+  function handleEmailChange(v: string) {
+    setEmail(v)
+    if (v !== lastCheckedEmail) setBouncerState(null)
+  }
 
   function handleExport() { exportOrderXlsx(order, clientName, contact) }
 
   async function handleConfirm() {
-    setSubmitting(true)
     setSubmitError(null)
+
+    // Run bouncer check on submit if email hasn't been checked yet
+    if (validateEmail(email) && email !== lastCheckedEmail) {
+      const result = await checkBouncer(email)
+      if (result === 'blocked') return
+    } else if (bouncerState === 'blocked') {
+      return
+    }
+
+    setSubmitting(true)
     try {
       const res = await fetch('/api/submit-order', {
         method: 'POST',
@@ -121,7 +197,7 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
             <p className="text-sm mt-0.5" style={{ color: 'var(--text3)' }}>
               {clientName
                 ? <>Client: <span style={{ color: 'var(--text2)' }}>{clientName}</span></>
-                : 'No client name provided'}
+                : 'Review your order and fill in contact details'}
             </p>
           </div>
           <button
@@ -173,27 +249,57 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
               />
               {lastNameError && <p className="mt-1 text-[11px]" style={{ color: '#EF4444' }}>{lastNameError}</p>}
             </div>
+
+            {/* Email — with bouncer status icon */}
             <div>
               <label htmlFor="cs-email" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Email</label>
-              <input
-                id="cs-email"
-                type="email"
-                autoComplete="email"
-                placeholder="jane@company.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                onBlur={() => setEmailTouched(true)}
-                className={inputCls}
-                style={inputStyle(emailError)}
-                aria-invalid={emailError}
-                aria-describedby={emailError ? 'cs-email-error' : undefined}
-              />
-              {emailError && (
-                <p id="cs-email-error" className="mt-1 text-[11px]" style={{ color: '#EF4444' }}>
+              <div className="relative">
+                <input
+                  id="cs-email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="jane@company.com"
+                  value={email}
+                  onChange={e => handleEmailChange(e.target.value)}
+                  onBlur={handleEmailBlur}
+                  className={`${inputCls} ${bouncerState !== null ? 'pr-9' : ''}`}
+                  style={inputStyle(emailFormatError || bouncerState === 'blocked')}
+                  aria-invalid={emailFormatError || bouncerState === 'blocked'}
+                  aria-describedby="cs-email-msg"
+                />
+                {bouncerState === 'checking' && (
+                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <SpinnerIcon />
+                  </span>
+                )}
+                {bouncerState === 'ok' && (
+                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <CheckIcon />
+                  </span>
+                )}
+                {bouncerState === 'warn' && (
+                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <WarnIcon />
+                  </span>
+                )}
+              </div>
+              {emailFormatError && !bouncerState && (
+                <p id="cs-email-msg" className="mt-1 text-[11px]" style={{ color: '#EF4444' }}>
                   Please enter a valid email address.
                 </p>
               )}
+              {bouncerState === 'blocked' && (
+                <p id="cs-email-msg" className="mt-1 text-[11px]" style={{ color: '#EF4444' }}>
+                  This email address can&apos;t be reached. Please use a valid work email.
+                </p>
+              )}
+              {bouncerState === 'warn' && (
+                <p id="cs-email-msg" className="mt-1 text-[11px]" style={{ color: '#CA8A04' }}>
+                  Could not fully verify this email — double-check before submitting.
+                </p>
+              )}
             </div>
+
             <div>
               <label htmlFor="cs-company" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Company name</label>
               <input
@@ -289,7 +395,7 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
             className="w-full sm:w-auto px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2 disabled:opacity-30 disabled:cursor-not-allowed"
             style={{ background: 'var(--cta)', color: '#fff', '--tw-ring-color': 'var(--cta)' } as React.CSSProperties}
           >
-            {submitting ? 'Sending…' : 'Confirm & Send Order Form'}
+            {submitting ? 'Sending…' : bouncerState === 'checking' ? 'Verifying…' : 'Confirm & Send Order Form'}
           </button>
         </div>
       </div>

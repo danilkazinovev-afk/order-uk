@@ -111,6 +111,7 @@ export default function OrderTable({ order, onChange }: Props) {
                           value={boxes === 0 ? '' : boxes}
                           data-order-input={product.article}
                           onFocus={(e) => e.target.select()}
+                          onWheel={(e) => e.currentTarget.blur()}
                           onKeyDown={(e) => handleOrderTab(product.article, e)}
                           onChange={(e) => {
                             const v = parseInt(e.target.value, 10)
@@ -290,6 +291,7 @@ export default function OrderTable({ order, onChange }: Props) {
                               value={boxes === 0 ? '' : boxes}
                               data-order-input={product.article}
                               onFocus={(e) => e.target.select()}
+                          onWheel={(e) => e.currentTarget.blur()}
                               onKeyDown={(e) => handleOrderTab(product.article, e)}
                               onChange={(e) => {
                                 const v = parseInt(e.target.value, 10)

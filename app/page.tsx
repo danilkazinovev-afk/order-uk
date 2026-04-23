@@ -8,7 +8,6 @@ import { calcGrandTotals, OrderState } from '@/lib/calculations'
 
 export default function Home() {
   const [order, setOrder] = useState<OrderState>({})
-  const [clientName, setClientName] = useState('')
   const [showSummary, setShowSummary] = useState(false)
 
   const handleChange = useCallback((article: string, value: number) => {
@@ -24,7 +23,6 @@ export default function Home() {
 
   const handleReset = useCallback(() => {
     setOrder({})
-    setClientName('')
   }, [])
 
   const grand = calcGrandTotals(order)
@@ -37,13 +35,6 @@ export default function Home() {
     { label: 'Weight',  value: `${grand.weightGross.toFixed(1)} kg`,  style: { color: 'var(--text)' } },
     { label: 'Total',   value: `€${grand.totalValue.toFixed(2)}`,     style: { color: 'var(--value)', fontSize: '1rem', fontWeight: 700 } as React.CSSProperties },
   ]
-
-  const clientInputStyle = {
-    background: 'var(--surface2)',
-    border: '1px solid var(--border2)',
-    color: 'var(--text)',
-    '--tw-ring-color': 'var(--accent)',
-  } as React.CSSProperties
 
   return (
     <div className="h-dvh flex flex-col overflow-hidden" style={{ background: 'var(--bg)' }}>
@@ -63,17 +54,6 @@ export default function Home() {
               <span className="font-bold text-[17px] tracking-tight" style={{ color: 'var(--text)' }}>Tea Order Form</span>
               <span className="text-[12px] uppercase tracking-widest font-medium mt-0.5" style={{ color: 'var(--text3)' }}>Wholesale</span>
             </div>
-            <div className="h-5 w-px" style={{ background: 'var(--border2)' }} />
-            <label htmlFor="client-name" className="sr-only">Client name</label>
-            <input
-              id="client-name"
-              type="text"
-              placeholder="Client name..."
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-              className="px-3 py-1.5 rounded-lg text-sm w-48 transition-all duration-150 cursor-pointer focus:outline-none focus:ring-2"
-              style={clientInputStyle}
-            />
           </div>
           <div className="flex items-center gap-6">
             {statItems.map((s) => (
@@ -121,18 +101,6 @@ export default function Home() {
             <span className="font-bold text-[15px] tracking-tight" style={{ color: 'var(--text)' }}>Tea Order Form</span>
             <span className="text-[10px] uppercase tracking-widest font-medium" style={{ color: 'var(--text3)' }}>Wholesale</span>
           </div>
-        </div>
-        <div className="px-4 pb-3">
-          <label htmlFor="client-name-mobile" className="sr-only">Client name</label>
-          <input
-            id="client-name-mobile"
-            type="text"
-            placeholder="Client name..."
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg text-sm transition-all duration-150 focus:outline-none focus:ring-2"
-            style={clientInputStyle}
-          />
         </div>
       </header>
 
@@ -195,7 +163,7 @@ export default function Home() {
       {showSummary && (
         <OrderSummary
           order={order}
-          clientName={clientName}
+          clientName=""
           onClose={() => setShowSummary(false)}
           onReset={handleReset}
         />
