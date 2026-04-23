@@ -120,77 +120,79 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
           </button>
         </div>
 
-        {/* Contact fields */}
-        <div className="px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface2)' }}>
-          <div>
-            <label htmlFor="cs-first-name" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>First name</label>
-            <input
-              id="cs-first-name"
-              type="text"
-              autoComplete="given-name"
-              placeholder="Jane"
-              value={firstName}
-              onChange={e => setFirstName(e.target.value)}
-              className={inputCls}
-              style={inputStyle()}
-            />
-          </div>
-          <div>
-            <label htmlFor="cs-last-name" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Last name</label>
-            <input
-              id="cs-last-name"
-              type="text"
-              autoComplete="family-name"
-              placeholder="Smith"
-              value={lastName}
-              onChange={e => setLastName(e.target.value)}
-              className={inputCls}
-              style={inputStyle()}
-            />
-          </div>
-          <div>
-            <label htmlFor="cs-email" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Email</label>
-            <input
-              id="cs-email"
-              type="email"
-              autoComplete="email"
-              placeholder="jane@company.com"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              onBlur={() => setEmailTouched(true)}
-              className={inputCls}
-              style={inputStyle(emailError)}
-              aria-invalid={emailError}
-              aria-describedby={emailError ? 'cs-email-error' : undefined}
-            />
-            {emailError && (
-              <p id="cs-email-error" className="mt-1 text-[11px]" style={{ color: '#EF4444' }}>
-                Please enter a valid email address.
-              </p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="cs-company" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Company name</label>
-            <input
-              id="cs-company"
-              type="text"
-              autoComplete="organization"
-              placeholder="Acme Ltd."
-              value={company}
-              onChange={e => setCompany(e.target.value)}
-              className={inputCls}
-              style={inputStyle()}
-            />
-          </div>
-        </div>
+        {/* Scrollable body: contact form + order table */}
+        <div className="flex-1 overflow-y-auto min-h-0">
 
-        {/* Table */}
-        {rows.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center py-16 text-[17px] font-medium" style={{ color: 'var(--text3)' }}>
-            No items ordered yet.
+          {/* Contact fields */}
+          <div className="px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-3" style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface2)' }}>
+            <div>
+              <label htmlFor="cs-first-name" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>First name</label>
+              <input
+                id="cs-first-name"
+                type="text"
+                autoComplete="given-name"
+                placeholder="Jane"
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+                className={inputCls}
+                style={inputStyle()}
+              />
+            </div>
+            <div>
+              <label htmlFor="cs-last-name" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Last name</label>
+              <input
+                id="cs-last-name"
+                type="text"
+                autoComplete="family-name"
+                placeholder="Smith"
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+                className={inputCls}
+                style={inputStyle()}
+              />
+            </div>
+            <div>
+              <label htmlFor="cs-email" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Email</label>
+              <input
+                id="cs-email"
+                type="email"
+                autoComplete="email"
+                placeholder="jane@company.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                onBlur={() => setEmailTouched(true)}
+                className={inputCls}
+                style={inputStyle(emailError)}
+                aria-invalid={emailError}
+                aria-describedby={emailError ? 'cs-email-error' : undefined}
+              />
+              {emailError && (
+                <p id="cs-email-error" className="mt-1 text-[11px]" style={{ color: '#EF4444' }}>
+                  Please enter a valid email address.
+                </p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="cs-company" className="block text-[11px] font-semibold uppercase tracking-wider mb-1" style={{ color: 'var(--text3)' }}>Company name</label>
+              <input
+                id="cs-company"
+                type="text"
+                autoComplete="organization"
+                placeholder="Acme Ltd."
+                value={company}
+                onChange={e => setCompany(e.target.value)}
+                className={inputCls}
+                style={inputStyle()}
+              />
+            </div>
           </div>
-        ) : (
-          <div className="flex-1 overflow-auto">
+
+          {/* Order table */}
+          {rows.length === 0 ? (
+            <div className="flex items-center justify-center py-16 text-[17px] font-medium" style={{ color: 'var(--text3)' }}>
+              No items ordered yet.
+            </div>
+          ) : (
             <table className="w-full text-sm">
               <thead className="sticky top-0 z-10">
                 <tr style={{ background: 'var(--surface3)', borderBottom: '1px solid var(--border2)' }}
@@ -231,8 +233,9 @@ export default function OrderSummary({ order, clientName, onClose, onReset }: Pr
                 </tr>
               </tfoot>
             </table>
-          </div>
-        )}
+          )}
+
+        </div>
 
         {/* Footer */}
         <div className="px-4 py-4 flex flex-col sm:flex-row gap-2 sm:justify-end sm:items-center" style={{ borderTop: '1px solid var(--border)' }}>

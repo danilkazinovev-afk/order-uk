@@ -34,6 +34,10 @@ interface SubmitOrderBody {
   totals: Totals
 }
 
+function sanitize(str: string): string {
+  return str.replace(/[<>'"]/g, '')
+}
+
 export async function POST(request: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -55,18 +59,63 @@ export async function POST(request: Request) {
 
   const { clientName, contact, items, totals } = body
 
+  // Type-check all string fields before any string operations
+  if (
+    typeof clientName !== 'string' ||
+    typeof contact?.firstName !== 'string' ||
+    typeof contact?.lastName !== 'string' ||
+    typeof contact?.email !== 'string' ||
+    typeof contact?.company !== 'string'
+  ) {
+    return Response.json({ error: 'Invalid input' }, { status: 400 })
+  }
+
+  // Reject XSS attempts and enforce length limits
+  const MAX_STR = 200
+  const stringFields = [clientName, contact.firstName, contact.lastName, contact.email, contact.company]
+  if (stringFields.some(f => f.includes('<') || f.length > MAX_STR)) {
+    return Response.json({ error: 'Invalid input' }, { status: 400 })
+  }
+
+  // Server-side email format validation
+  if (contact.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact.email.trim())) {
+    return Response.json({ error: 'Invalid email' }, { status: 400 })
+  }
+
   if (!items?.length) {
     return Response.json({ error: 'No items in order' }, { status: 400 })
+  }
+
+  // Cap items to prevent DB flooding
+  if (items.length > 200) {
+    return Response.json({ error: 'Too many items' }, { status: 400 })
+  }
+
+  // Validate all numeric fields — prevents NaN/Infinity crashes in .toFixed()
+  // boxes/packs must be positive integers; pallets/weight/value can be decimals
+  const isInt  = (n: unknown) => typeof n === 'number' && Number.isInteger(n) && n >= 1
+  const isDec  = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && n >= 0
+
+  const totalsOk = isInt(totals?.boxes) && isInt(totals?.packs) &&
+    isDec(totals?.pallets) && isDec(totals?.weightGross) && isDec(totals?.totalValue)
+  if (!totalsOk) {
+    return Response.json({ error: 'Invalid totals' }, { status: 400 })
+  }
+  for (const item of items) {
+    if (!isInt(item.boxes) || !isInt(item.packs) || !isDec(item.pallets) ||
+        !isDec(item.weightGross) || !isDec(item.totalValue)) {
+      return Response.json({ error: 'Invalid item data' }, { status: 400 })
+    }
   }
 
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({
-      client_name:  clientName,
-      first_name:   contact.firstName,
-      last_name:    contact.lastName,
-      email:        contact.email,
-      company:      contact.company,
+      client_name:  sanitize(clientName ?? ''),
+      first_name:   sanitize(contact.firstName ?? ''),
+      last_name:    sanitize(contact.lastName ?? ''),
+      email:        sanitize(contact.email ?? ''),
+      company:      sanitize(contact.company ?? ''),
       total_boxes:        totals.boxes,
       total_packs:        totals.packs,
       total_pallets:      +totals.pallets.toFixed(3),
