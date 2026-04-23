@@ -93,7 +93,7 @@ export async function POST(request: Request) {
 
   // Validate all numeric fields — prevents NaN/Infinity crashes in .toFixed()
   // boxes/packs must be positive integers; pallets/weight/value can be decimals
-  const isInt  = (n: unknown) => typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 99_999
+  const isInt  = (n: unknown) => typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 99
   const isDec  = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && n >= 0 && n <= 10_000_000
 
   const totalsOk = isInt(totals?.boxes) && isInt(totals?.packs) &&
