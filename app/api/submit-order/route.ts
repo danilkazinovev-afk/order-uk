@@ -93,16 +93,18 @@ export async function POST(request: Request) {
 
   // Validate all numeric fields — prevents NaN/Infinity crashes in .toFixed()
   // boxes/packs must be positive integers; pallets/weight/value can be decimals
-  const isInt  = (n: unknown) => typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 99
-  const isDec  = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && n >= 0 && n <= 10_000_000
+  // Per-item box count: 1–99. Totals are sums across up to 200 items so cap higher.
+  const isItemInt  = (n: unknown) => typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 99
+  const isTotalInt = (n: unknown) => typeof n === 'number' && Number.isInteger(n) && n >= 1 && n <= 200 * 99
+  const isDec      = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && n >= 0 && n <= 10_000_000
 
-  const totalsOk = isInt(totals?.boxes) && isInt(totals?.packs) &&
+  const totalsOk = isTotalInt(totals?.boxes) && isTotalInt(totals?.packs) &&
     isDec(totals?.pallets) && isDec(totals?.weightGross) && isDec(totals?.totalValue)
   if (!totalsOk) {
     return Response.json({ error: 'Invalid totals' }, { status: 400 })
   }
   for (const item of items) {
-    if (!isInt(item.boxes) || !isInt(item.packs) || !isDec(item.pallets) ||
+    if (!isItemInt(item.boxes) || !isTotalInt(item.packs) || !isDec(item.pallets) ||
         !isDec(item.weightGross) || !isDec(item.totalValue)) {
       return Response.json({ error: 'Invalid item data' }, { status: 400 })
     }
